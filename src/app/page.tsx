@@ -1,19 +1,24 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { requireUserId } from "@/lib/auth-helpers";
-import { getCurrentExperience } from "@/lib/dashboard";
+import { getCurrentExperience, getRecentSatisfaction } from "@/lib/dashboard";
 import { computeNetEstimate, computePackageTotal, formatEuros, getNetEstimateRatio } from "@/lib/package";
+import { averageScore } from "@/lib/satisfaction";
 import { durationLabel } from "./experiences/date-range";
 import { WidgetCard } from "@/components/widget-card";
 import { logout } from "./logout/actions";
 
+const monthFormatter = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
+
 export default async function Home() {
   const session = await auth();
   const userId = await requireUserId();
-  const [currentExperience, netEstimateRatio] = await Promise.all([
+  const [currentExperience, netEstimateRatio, recentSatisfaction] = await Promise.all([
     getCurrentExperience(userId),
     getNetEstimateRatio(userId),
+    getRecentSatisfaction(userId),
   ]);
+  const [latestSatisfaction, previousSatisfaction] = recentSatisfaction;
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
@@ -70,6 +75,29 @@ export default async function Home() {
               </div>
             ) : (
               <p className="text-sm text-neutral-500">Package pas encore configuré.</p>
+            )}
+          </WidgetCard>
+
+          <WidgetCard title="Satisfaction" href="/satisfaction">
+            {latestSatisfaction ? (
+              <div>
+                <p className="font-medium text-neutral-900 dark:text-neutral-100">
+                  {averageScore(latestSatisfaction).toFixed(1)}/10
+                </p>
+                <p className="text-sm capitalize text-neutral-500">
+                  {monthFormatter.format(new Date(latestSatisfaction.month))}
+                </p>
+                {previousSatisfaction && (
+                  <p className="mt-2 text-xs text-neutral-400">
+                    {averageScore(latestSatisfaction) >= averageScore(previousSatisfaction)
+                      ? "↗ en hausse"
+                      : "↘ en baisse"}{" "}
+                    vs mois précédent
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-neutral-500">Aucune évaluation pour l&apos;instant.</p>
             )}
           </WidgetCard>
         </div>
