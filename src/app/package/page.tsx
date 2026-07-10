@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireUserId } from "@/lib/auth-helpers";
 import { listExperiencesWithPackage } from "@/lib/experiences";
-import { computePackageTotal, formatEuros, getNetEstimateRatio } from "@/lib/package";
+import { computeDeltaPercent, computePackageTotal, formatEuros, getNetEstimateRatio } from "@/lib/package";
 import { formatDateRange } from "../experiences/date-range";
 
 export default async function PackageHistoryPage() {
@@ -68,6 +68,51 @@ export default async function PackageHistoryPage() {
             );
           })}
         </ul>
+
+        {withPackage.length > 1 && (
+          <section className="mt-12">
+            <h3 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+              Comparaison entre postes
+            </h3>
+            <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-neutral-200 text-neutral-500 dark:border-neutral-800">
+                  <tr>
+                    <th className="px-4 py-2 font-medium">Poste</th>
+                    <th className="px-4 py-2 font-medium">Package annuel</th>
+                    <th className="px-4 py-2 font-medium">Évolution</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {withPackage.map((exp, i) => {
+                    const total = computePackageTotal(exp.salaryPackage!);
+                    const previousTotal =
+                      i > 0 ? computePackageTotal(withPackage[i - 1].salaryPackage!) : null;
+                    const deltaPercent = computeDeltaPercent(total, previousTotal);
+                    return (
+                      <tr key={exp.id} className="border-b border-neutral-100 last:border-0 dark:border-neutral-900">
+                        <td className="px-4 py-2 text-neutral-900 dark:text-neutral-100">
+                          {exp.title} — {exp.company}
+                        </td>
+                        <td className="px-4 py-2 text-neutral-700 dark:text-neutral-300">{formatEuros(total)}</td>
+                        <td className="px-4 py-2">
+                          {deltaPercent === null ? (
+                            <span className="text-neutral-400">—</span>
+                          ) : (
+                            <span className={deltaPercent >= 0 ? "text-green-600" : "text-red-600"}>
+                              {deltaPercent >= 0 ? "+" : ""}
+                              {deltaPercent.toFixed(1)}%
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );

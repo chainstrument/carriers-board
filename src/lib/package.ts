@@ -27,6 +27,11 @@ export function computeNetEstimate(pkg: SalaryPackage, netEstimateRatio: number)
   return Math.round(computePackageTotal(pkg) * netEstimateRatio);
 }
 
+export function computeDeltaPercent(current: number, previous: number | null): number | null {
+  if (previous === null || previous === 0) return null;
+  return ((current - previous) / previous) * 100;
+}
+
 export function formatEuros(amount: number): string {
   return new Intl.NumberFormat("fr-FR", {
     style: "currency",
