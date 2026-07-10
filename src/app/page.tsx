@@ -47,6 +47,12 @@ export default async function Home() {
           >
             Voir mes compétences →
           </Link>
+          <Link
+            href="/journal"
+            className="inline-block rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 dark:border-neutral-700 dark:text-neutral-300"
+          >
+            Voir mon journal →
+          </Link>
         </div>
       </main>
     </div>
