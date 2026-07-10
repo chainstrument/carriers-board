@@ -13,12 +13,17 @@ export default async function ExperiencesPage() {
         <Link href="/" className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
           CareerBoard
         </Link>
-        <Link
-          href="/experiences/new"
-          className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white dark:bg-neutral-100 dark:text-neutral-900"
-        >
-          + Nouvelle expérience
-        </Link>
+        <div className="flex items-center gap-4 text-sm">
+          <Link href="/package" className="text-neutral-600 hover:underline dark:text-neutral-400">
+            Évolution du package
+          </Link>
+          <Link
+            href="/experiences/new"
+            className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white dark:bg-neutral-100 dark:text-neutral-900"
+          >
+            + Nouvelle expérience
+          </Link>
+        </div>
       </header>
 
       <main className="mx-auto max-w-3xl px-6 py-16">

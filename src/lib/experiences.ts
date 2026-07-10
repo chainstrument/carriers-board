@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { experiences } from "@/lib/db/schema";
 
@@ -13,6 +13,14 @@ export async function listExperiencesWithTech(userId: string) {
     ...row,
     technologies: row.experienceCompetences.map((ec) => ec.competence.name),
   }));
+}
+
+export async function listExperiencesWithPackage(userId: string) {
+  return db.query.experiences.findMany({
+    where: eq(experiences.userId, userId),
+    orderBy: [asc(experiences.startDate)],
+    with: { salaryPackage: true },
+  });
 }
 
 export async function getExperienceWithTech(userId: string, experienceId: string) {
