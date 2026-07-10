@@ -149,6 +149,12 @@ export default async function Home() {
               <p className="text-sm text-neutral-500">Aucune note pour l&apos;instant.</p>
             )}
           </WidgetCard>
+
+          <WidgetCard title="Objectifs en cours">
+            <p className="text-sm text-neutral-500">
+              Le suivi d&apos;objectifs arrive avec l&apos;epic Objectifs.
+            </p>
+          </WidgetCard>
         </div>
 
         <div className="mt-10 flex flex-wrap gap-3">
