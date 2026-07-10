@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { requireUserId } from "@/lib/auth-helpers";
-import { getCurrentExperience, getRecentSatisfaction } from "@/lib/dashboard";
+import { getCurrentExperience, getRecentSatisfaction, getRecentJournalEntries } from "@/lib/dashboard";
 import { computeNetEstimate, computePackageTotal, formatEuros, getNetEstimateRatio } from "@/lib/package";
 import { averageScore } from "@/lib/satisfaction";
 import { computeRiskLevel, getStaleKeyCompetencesCount } from "@/lib/risk";
@@ -22,12 +22,14 @@ const RISK_LABELS = { faible: "Faible", modere: "Modéré", eleve: "Élevé" };
 export default async function Home() {
   const session = await auth();
   const userId = await requireUserId();
-  const [currentExperience, netEstimateRatio, recentSatisfaction, staleKeyCompetencesCount] = await Promise.all([
-    getCurrentExperience(userId),
-    getNetEstimateRatio(userId),
-    getRecentSatisfaction(userId),
-    getStaleKeyCompetencesCount(),
-  ]);
+  const [currentExperience, netEstimateRatio, recentSatisfaction, staleKeyCompetencesCount, recentJournalEntries] =
+    await Promise.all([
+      getCurrentExperience(userId),
+      getNetEstimateRatio(userId),
+      getRecentSatisfaction(userId),
+      getStaleKeyCompetencesCount(),
+      getRecentJournalEntries(userId),
+    ]);
   const [latestSatisfaction, previousSatisfaction] = recentSatisfaction;
   const risk = computeRiskLevel({
     currentExperience: currentExperience ?? null,
@@ -126,6 +128,25 @@ export default async function Home() {
               </ul>
             ) : (
               <p className="mt-2 text-xs text-neutral-500">Rien à signaler pour l&apos;instant.</p>
+            )}
+          </WidgetCard>
+
+          <WidgetCard title="Dernières notes de journal" href="/journal">
+            {recentJournalEntries.length > 0 ? (
+              <ul className="space-y-2">
+                {recentJournalEntries.map((entry) => (
+                  <li key={entry.id} className="text-sm">
+                    <p className="line-clamp-1 text-neutral-700 dark:text-neutral-300">{entry.content}</p>
+                    <p className="text-xs text-neutral-400">
+                      {new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(
+                        new Date(entry.entryDate),
+                      )}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-neutral-500">Aucune note pour l&apos;instant.</p>
             )}
           </WidgetCard>
         </div>
