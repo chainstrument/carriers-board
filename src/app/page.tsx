@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { requireUserId } from "@/lib/auth-helpers";
-import { getCurrentExperience, getRecentSatisfaction, getRecentJournalEntries, getTopCompetences } from "@/lib/dashboard";
+import {
+  getCurrentExperience,
+  getRecentSatisfaction,
+  getRecentJournalEntries,
+  getTopCompetences,
+  getActiveGoals,
+} from "@/lib/dashboard";
 import { computeNetEstimate, computePackageTotal, formatEuros, getNetEstimateRatio } from "@/lib/package";
 import { averageScore } from "@/lib/satisfaction";
 import { computeRiskLevel, getStaleKeyCompetencesCount } from "@/lib/risk";
+import { priorityLabel } from "@/lib/goals";
 import { durationLabel } from "./experiences/date-range";
 import { WidgetCard } from "@/components/widget-card";
 import { LevelDots } from "@/components/level-dots";
@@ -30,6 +37,7 @@ export default async function Home() {
     staleKeyCompetencesCount,
     recentJournalEntries,
     topCompetences,
+    activeGoals,
   ] = await Promise.all([
     getCurrentExperience(userId),
     getNetEstimateRatio(userId),
@@ -37,6 +45,7 @@ export default async function Home() {
     getStaleKeyCompetencesCount(),
     getRecentJournalEntries(userId),
     getTopCompetences(),
+    getActiveGoals(userId),
   ]);
   const [latestSatisfaction, previousSatisfaction] = recentSatisfaction;
   const risk = computeRiskLevel({
@@ -158,10 +167,27 @@ export default async function Home() {
             )}
           </WidgetCard>
 
-          <WidgetCard title="Objectifs en cours">
-            <p className="text-sm text-neutral-500">
-              Le suivi d&apos;objectifs arrive avec l&apos;epic Objectifs.
-            </p>
+          <WidgetCard title="Objectifs en cours" href="/objectifs">
+            {activeGoals.length > 0 ? (
+              <ul className="space-y-2">
+                {activeGoals.map((goal) => (
+                  <li key={goal.id} className="text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-neutral-700 dark:text-neutral-300">{goal.title}</span>
+                      <span className="text-xs text-neutral-400">{priorityLabel(goal.priority)}</span>
+                    </div>
+                    <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
+                      <div
+                        className="h-full rounded-full bg-neutral-700 dark:bg-neutral-300"
+                        style={{ width: `${goal.progress}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-neutral-500">Aucun objectif en cours.</p>
+            )}
           </WidgetCard>
 
           <WidgetCard title="Compétences principales" href="/competences">

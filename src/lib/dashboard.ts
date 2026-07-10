@@ -1,6 +1,6 @@
-import { and, desc, isNotNull, isNull, eq } from "drizzle-orm";
+import { and, desc, inArray, isNotNull, isNull, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { competences, experiences, journalEntries, satisfactionEntries } from "@/lib/db/schema";
+import { competences, experiences, goals, journalEntries, satisfactionEntries } from "@/lib/db/schema";
 
 export async function getCurrentExperience(userId: string) {
   return db.query.experiences.findFirst({
@@ -30,6 +30,14 @@ export async function getTopCompetences(limit = 5) {
   return db.query.competences.findMany({
     where: isNotNull(competences.level),
     orderBy: [desc(competences.level), desc(competences.confidence)],
+    limit,
+  });
+}
+
+export async function getActiveGoals(userId: string, limit = 4) {
+  return db.query.goals.findMany({
+    where: and(eq(goals.userId, userId), inArray(goals.status, ["todo", "in_progress"])),
+    orderBy: [desc(goals.priority)],
     limit,
   });
 }
