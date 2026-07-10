@@ -274,3 +274,49 @@ export const goalsRelations = relations(goals, ({ one }) => ({
     references: [competences.id],
   }),
 }));
+
+export const projects = pgTable("projects", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  client: text("client"),
+  duration: text("duration"),
+  // 1-5, même échelle que le niveau/la confiance des compétences.
+  difficulty: integer("difficulty"),
+  impact: text("impact"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type Project = typeof projects.$inferSelect;
+export type NewProject = typeof projects.$inferInsert;
+
+export const projectCompetences = pgTable(
+  "project_competences",
+  {
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    competenceId: uuid("competence_id")
+      .notNull()
+      .references(() => competences.id, { onDelete: "cascade" }),
+  },
+  (table) => [primaryKey({ columns: [table.projectId, table.competenceId] })],
+);
+
+export const projectsRelations = relations(projects, ({ many }) => ({
+  projectCompetences: many(projectCompetences),
+}));
+
+export const projectCompetencesRelations = relations(projectCompetences, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectCompetences.projectId],
+    references: [projects.id],
+  }),
+  competence: one(competences, {
+    fields: [projectCompetences.competenceId],
+    references: [competences.id],
+  }),
+}));

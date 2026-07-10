@@ -85,6 +85,13 @@
       "when": 1783720203417,
       "tag": "0011_stiff_the_twelve",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1783720674649,
+      "tag": "0012_smart_abomination",
+      "breakpoints": true
     }
   ]
 }

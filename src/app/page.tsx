@@ -237,6 +237,12 @@ export default async function Home() {
           >
             Voir mes objectifs →
           </Link>
+          <Link
+            href="/projets"
+            className="inline-block rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 dark:border-neutral-700 dark:text-neutral-300"
+          >
+            Voir mes projets →
+          </Link>
         </div>
       </main>
     </div>
