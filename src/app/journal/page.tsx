@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUserId } from "@/lib/auth-helpers";
 import { listJournalEntries } from "@/lib/journal";
+import { moodEmoji } from "@/lib/mood";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 
@@ -44,8 +45,9 @@ export default async function JournalPage() {
                 href={`/journal/${entry.id}/edit`}
                 className="block rounded-lg border border-neutral-200 p-4 hover:border-neutral-400 dark:border-neutral-800 dark:hover:border-neutral-600"
               >
-                <p className="text-xs text-neutral-500">
+                <p className="flex items-center gap-2 text-xs text-neutral-500">
                   {dateFormatter.format(new Date(entry.entryDate))}
+                  {moodEmoji(entry.mood) && <span>{moodEmoji(entry.mood)}</span>}
                 </p>
                 <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-800 dark:text-neutral-200">
                   {entry.content}

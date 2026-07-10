@@ -151,6 +151,10 @@ export const journalEntries = pgTable("journal_entries", {
     .references(() => users.id, { onDelete: "cascade" }),
   entryDate: date("entry_date").notNull(),
   content: text("content").notNull(),
+  // Échelle 1-5 (très mauvaise à très bonne humeur), cohérent avec les
+  // autres échelles courtes de l'app (compétences). Nullable : noter son
+  // humeur reste optionnel, l'essentiel est d'écrire la note.
+  mood: integer("mood"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

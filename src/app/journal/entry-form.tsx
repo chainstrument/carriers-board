@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import type { ActionState } from "./actions";
 import type { JournalEntry } from "@/lib/db/schema";
 import { TagInput } from "@/components/tag-input";
+import { MOOD_OPTIONS } from "@/lib/mood";
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -51,6 +52,28 @@ export function EntryForm({
           placeholder="Qu'est-ce qui s'est passé aujourd'hui ?"
           className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800"
         />
+      </div>
+
+      <div className="space-y-1">
+        <span className="text-sm text-neutral-600 dark:text-neutral-400">Humeur</span>
+        <div className="flex gap-2">
+          {MOOD_OPTIONS.map((option) => (
+            <label
+              key={option.value}
+              className="flex cursor-pointer flex-col items-center gap-1 rounded-md border border-neutral-200 px-3 py-2 text-xs has-[:checked]:border-neutral-500 dark:border-neutral-800"
+            >
+              <input
+                type="radio"
+                name="mood"
+                value={option.value}
+                defaultChecked={defaultValues?.mood === option.value}
+                className="sr-only"
+              />
+              <span className="text-lg">{option.emoji}</span>
+              <span className="text-neutral-500">{option.label}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
       <TagInput name="tags" label="Tags" placeholder="rachat, conflit, fierté..." defaultTags={defaultTags} />

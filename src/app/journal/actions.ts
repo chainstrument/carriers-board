@@ -13,6 +13,7 @@ export type ActionState = { error?: string } | undefined;
 const entrySchema = z.object({
   entryDate: z.string().min(1, "La date est requise."),
   content: z.string().min(1, "Le contenu est requis."),
+  mood: z.coerce.number().int().min(1).max(5).optional(),
   tags: z.string().optional(),
 });
 
@@ -43,6 +44,7 @@ function parsedData(formData: FormData) {
   return entrySchema.safeParse({
     entryDate: formData.get("entryDate"),
     content: formData.get("content"),
+    mood: formData.get("mood") || undefined,
     tags: formData.get("tags") || undefined,
   });
 }
@@ -57,7 +59,12 @@ export async function createEntry(
 
   const [entry] = await db
     .insert(journalEntries)
-    .values({ userId, entryDate: parsed.data.entryDate, content: parsed.data.content })
+    .values({
+      userId,
+      entryDate: parsed.data.entryDate,
+      content: parsed.data.content,
+      mood: parsed.data.mood ?? null,
+    })
     .returning();
 
   await syncTags(entry.id, parseTagNames(parsed.data.tags));
@@ -77,7 +84,12 @@ export async function updateEntry(
 
   const [updated] = await db
     .update(journalEntries)
-    .set({ entryDate: parsed.data.entryDate, content: parsed.data.content, updatedAt: new Date() })
+    .set({
+      entryDate: parsed.data.entryDate,
+      content: parsed.data.content,
+      mood: parsed.data.mood ?? null,
+      updatedAt: new Date(),
+    })
     .where(and(eq(journalEntries.id, entryId), eq(journalEntries.userId, userId)))
     .returning();
 

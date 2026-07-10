@@ -57,6 +57,13 @@
       "when": 1783717526408,
       "tag": "0007_round_professor_monster",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1783717652956,
+      "tag": "0008_ambitious_shatterstar",
+      "breakpoints": true
     }
   ]
 }
