@@ -243,3 +243,34 @@ export const satisfactionEntries = pgTable(
 
 export type SatisfactionEntry = typeof satisfactionEntries.$inferSelect;
 export type NewSatisfactionEntry = typeof satisfactionEntries.$inferInsert;
+
+export const goalPriorityEnum = pgEnum("goal_priority", ["low", "medium", "high"]);
+export const goalStatusEnum = pgEnum("goal_status", ["todo", "in_progress", "done", "abandoned"]);
+
+export const goals = pgTable("goals", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  deadline: date("deadline"),
+  priority: goalPriorityEnum("priority").notNull().default("medium"),
+  status: goalStatusEnum("status").notNull().default("todo"),
+  progress: integer("progress").notNull().default(0),
+  // Lien faible optionnel quand l'objectif est un objectif d'apprentissage
+  // (ex. "Apprendre Docker") — pas de cascade forte, juste un rattachement.
+  competenceId: uuid("competence_id").references(() => competences.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type Goal = typeof goals.$inferSelect;
+export type NewGoal = typeof goals.$inferInsert;
+
+export const goalsRelations = relations(goals, ({ one }) => ({
+  competence: one(competences, {
+    fields: [goals.competenceId],
+    references: [competences.id],
+  }),
+}));
