@@ -53,6 +53,12 @@ export default async function Home() {
           >
             Voir mon journal →
           </Link>
+          <Link
+            href="/satisfaction"
+            className="inline-block rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 dark:border-neutral-700 dark:text-neutral-300"
+          >
+            Voir ma satisfaction →
+          </Link>
         </div>
       </main>
     </div>

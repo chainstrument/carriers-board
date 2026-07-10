@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { boolean, date, integer, pgEnum, pgTable, primaryKey, real, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, date, integer, pgEnum, pgTable, primaryKey, real, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 
 export const themeEnum = pgEnum("theme", ["light", "dark", "dev"]);
 
@@ -212,3 +212,34 @@ export const journalEntryTagsRelations = relations(journalEntryTags, ({ one }) =
     references: [tags.id],
   }),
 }));
+
+// Une ligne par mois et par utilisateur (contrainte unique userId+month),
+// chaque critère noté 1-10 : plus de granularité que l'échelle 1-5 des
+// compétences, cohérent avec un usage type "auto-évaluation mensuelle".
+export const satisfactionEntries = pgTable(
+  "satisfaction_entries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    month: date("month").notNull(),
+    stress: integer("stress").notNull(),
+    salary: integer("salary").notNull(),
+    team: integer("team").notNull(),
+    management: integer("management").notNull(),
+    remoteWork: integer("remote_work").notNull(),
+    workplace: integer("workplace").notNull(),
+    workLifeBalance: integer("work_life_balance").notNull(),
+    technicalInterest: integer("technical_interest").notNull(),
+    autonomy: integer("autonomy").notNull(),
+    companyVision: integer("company_vision").notNull(),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique().on(table.userId, table.month)],
+);
+
+export type SatisfactionEntry = typeof satisfactionEntries.$inferSelect;
+export type NewSatisfactionEntry = typeof satisfactionEntries.$inferInsert;

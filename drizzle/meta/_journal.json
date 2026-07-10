@@ -71,6 +71,13 @@
       "when": 1783717797706,
       "tag": "0009_clear_reptil",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1783718246269,
+      "tag": "0010_daffy_jack_flag",
+      "breakpoints": true
     }
   ]
 }
