@@ -1,9 +1,15 @@
 import Link from "next/link";
 import { auth } from "@/auth";
+import { requireUserId } from "@/lib/auth-helpers";
+import { getCurrentExperience } from "@/lib/dashboard";
+import { durationLabel } from "./experiences/date-range";
+import { WidgetCard } from "@/components/widget-card";
 import { logout } from "./logout/actions";
 
 export default async function Home() {
   const session = await auth();
+  const userId = await requireUserId();
+  const currentExperience = await getCurrentExperience(userId);
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
@@ -26,15 +32,30 @@ export default async function Home() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6 py-16">
-        <h2 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
+      <main className="mx-auto max-w-4xl px-6 py-16">
+        <h2 className="mb-6 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
           Dashboard
         </h2>
-        <p className="mt-2 text-neutral-500">
-          Espace personnel connecté. Les widgets (poste actuel, package, satisfaction,
-          objectifs...) arriveront avec les prochains epics.
-        </p>
-        <div className="mt-6 flex gap-3">
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <WidgetCard title="Poste actuel" href={currentExperience ? `/experiences/${currentExperience.id}` : "/experiences/new"}>
+            {currentExperience ? (
+              <div>
+                <p className="font-medium text-neutral-900 dark:text-neutral-100">
+                  {currentExperience.title}
+                </p>
+                <p className="text-sm text-neutral-500">{currentExperience.company}</p>
+                <p className="mt-2 text-xs text-neutral-400">
+                  Ancienneté : {durationLabel(currentExperience.startDate, currentExperience.endDate)}
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-neutral-500">Aucun poste actuel renseigné.</p>
+            )}
+          </WidgetCard>
+        </div>
+
+        <div className="mt-10 flex flex-wrap gap-3">
           <Link
             href="/experiences"
             className="inline-block rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 dark:border-neutral-700 dark:text-neutral-300"
