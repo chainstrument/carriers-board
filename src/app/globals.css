@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Thème piloté par une classe explicite sur <html> (choix utilisateur en
+   base), pas par la préférence système : @custom-variant dark rend le
+   variant `dark:` de Tailwind dépendant de la classe `.dark` plutôt que de
+   `prefers-color-scheme`. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -12,11 +18,18 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+.theme-dev {
+  --background: #0b0f0c;
+  --foreground: #39ff6a;
+}
+
+.theme-dev body {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 body {

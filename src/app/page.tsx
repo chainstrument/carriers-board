@@ -15,6 +15,9 @@ export default async function Home() {
           <Link href="/profile" className="text-neutral-600 hover:underline dark:text-neutral-400">
             {session?.user?.name ?? session?.user?.email}
           </Link>
+          <Link href="/settings" className="text-neutral-600 hover:underline dark:text-neutral-400">
+            Paramètres
+          </Link>
           <form action={logout}>
             <button type="submit" className="text-neutral-600 hover:underline dark:text-neutral-400">
               Se déconnecter
