@@ -18,7 +18,7 @@ export async function listProjectsWithTech(userId: string) {
 export async function getProjectWithTech(userId: string, projectId: string) {
   const row = await db.query.projects.findFirst({
     where: and(eq(projects.id, projectId), eq(projects.userId, userId)),
-    with: { projectCompetences: { with: { competence: true } }, experience: true },
+    with: { projectCompetences: { with: { competence: true } }, experience: true, attachments: true },
   });
   if (!row) return null;
 

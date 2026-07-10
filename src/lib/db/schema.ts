@@ -309,8 +309,26 @@ export const projectCompetences = pgTable(
   (table) => [primaryKey({ columns: [table.projectId, table.competenceId] })],
 );
 
+// Pas de vrai stockage de fichiers pour l'instant (réservé à l'epic
+// Documents) : un lien (label + URL) vers un screenshot ou une doc
+// hébergée ailleurs. Suffisant en v1, upgradable plus tard sans casser
+// ce modèle (un upload pourrait remplir `url` avec un lien Vercel Blob).
+export const projectAttachments = pgTable("project_attachments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  label: text("label").notNull(),
+  url: text("url").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type ProjectAttachment = typeof projectAttachments.$inferSelect;
+export type NewProjectAttachment = typeof projectAttachments.$inferInsert;
+
 export const projectsRelations = relations(projects, ({ many, one }) => ({
   projectCompetences: many(projectCompetences),
+  attachments: many(projectAttachments),
   experience: one(experiences, {
     fields: [projects.experienceId],
     references: [experiences.id],
@@ -325,5 +343,12 @@ export const projectCompetencesRelations = relations(projectCompetences, ({ one 
   competence: one(competences, {
     fields: [projectCompetences.competenceId],
     references: [competences.id],
+  }),
+}));
+
+export const projectAttachmentsRelations = relations(projectAttachments, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectAttachments.projectId],
+    references: [projects.id],
   }),
 }));

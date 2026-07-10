@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { requireUserId } from "@/lib/auth-helpers";
 import { getProjectWithTech } from "@/lib/projects";
 import { LevelDots } from "@/components/level-dots";
-import { deleteProject } from "../actions";
+import { deleteProject, addAttachment, deleteAttachment } from "../actions";
+import { AttachmentForm } from "./attachment-form";
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -85,6 +86,36 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <p className="mt-1 whitespace-pre-wrap text-neutral-800 dark:text-neutral-200">{project.impact}</p>
           </div>
         )}
+
+        <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
+          <h3 className="mb-3 text-sm font-medium text-neutral-500">
+            Screenshots &amp; documentation
+          </h3>
+
+          {project.attachments.length > 0 && (
+            <ul className="mb-4 space-y-1">
+              {project.attachments.map((attachment) => (
+                <li key={attachment.id} className="flex items-center justify-between text-sm">
+                  <a
+                    href={attachment.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-neutral-700 underline dark:text-neutral-300"
+                  >
+                    {attachment.label}
+                  </a>
+                  <form action={deleteAttachment.bind(null, project.id, attachment.id)}>
+                    <button type="submit" className="text-xs text-red-600 hover:underline">
+                      Retirer
+                    </button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <AttachmentForm action={addAttachment.bind(null, project.id)} />
+        </div>
       </main>
     </div>
   );

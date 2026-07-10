@@ -6,7 +6,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { requireUserId } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
-import { competences, projectCompetences, projects } from "@/lib/db/schema";
+import { competences, projectAttachments, projectCompetences, projects } from "@/lib/db/schema";
 
 export type ActionState = { error?: string } | undefined;
 
@@ -124,4 +124,53 @@ export async function deleteProject(projectId: string) {
 
   revalidatePath("/projets");
   redirect("/projets");
+}
+
+const attachmentSchema = z.object({
+  label: z.string().min(1, "Le libellé est requis."),
+  url: z.string().url("URL invalide."),
+});
+
+export type AttachmentActionState = { error?: string } | undefined;
+
+export async function addAttachment(
+  projectId: string,
+  _prevState: AttachmentActionState,
+  formData: FormData,
+): Promise<AttachmentActionState> {
+  const userId = await requireUserId();
+  const project = await db.query.projects.findFirst({
+    where: and(eq(projects.id, projectId), eq(projects.userId, userId)),
+    columns: { id: true },
+  });
+  if (!project) return { error: "Projet introuvable." };
+
+  const parsed = attachmentSchema.safeParse({
+    label: formData.get("label"),
+    url: formData.get("url"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
+
+  await db.insert(projectAttachments).values({
+    projectId,
+    label: parsed.data.label,
+    url: parsed.data.url,
+  });
+
+  revalidatePath(`/projets/${projectId}`);
+  redirect(`/projets/${projectId}`);
+}
+
+export async function deleteAttachment(projectId: string, attachmentId: string) {
+  const userId = await requireUserId();
+  const project = await db.query.projects.findFirst({
+    where: and(eq(projects.id, projectId), eq(projects.userId, userId)),
+    columns: { id: true },
+  });
+  if (!project) return;
+
+  await db.delete(projectAttachments).where(eq(projectAttachments.id, attachmentId));
+
+  revalidatePath(`/projets/${projectId}`);
+  redirect(`/projets/${projectId}`);
 }
