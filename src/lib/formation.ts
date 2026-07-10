@@ -19,3 +19,10 @@ export function typeLabel(value: string): string {
 export function statusLabel(value: string): string {
   return STATUS_OPTIONS.find((o) => o.value === value)?.label ?? value;
 }
+
+export function formatMinutes(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest === 0 ? `${hours} h` : `${hours} h ${rest}`;
+}

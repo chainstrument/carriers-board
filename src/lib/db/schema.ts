@@ -366,6 +366,8 @@ export const trainingItems = pgTable("training_items", {
   source: text("source"),
   status: trainingStatusEnum("status").notNull().default("todo"),
   notes: text("notes"),
+  // Déclaratif, saisi par l'utilisateur — pas de tracking automatique.
+  timeSpentMinutes: integer("time_spent_minutes").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

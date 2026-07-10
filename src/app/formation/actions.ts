@@ -16,6 +16,7 @@ const itemSchema = z.object({
   source: z.string().optional(),
   status: z.enum(["todo", "in_progress", "done"]),
   notes: z.string().optional(),
+  timeSpentMinutes: z.coerce.number().int().min(0).optional(),
 });
 
 function parsedData(formData: FormData) {
@@ -25,6 +26,7 @@ function parsedData(formData: FormData) {
     source: formData.get("source") || undefined,
     status: formData.get("status"),
     notes: formData.get("notes") || undefined,
+    timeSpentMinutes: formData.get("timeSpentMinutes") || undefined,
   });
 }
 
@@ -44,6 +46,7 @@ export async function createItem(
     source: d.source || null,
     status: d.status,
     notes: d.notes || null,
+    timeSpentMinutes: d.timeSpentMinutes ?? 0,
   });
 
   revalidatePath("/formation");
@@ -68,6 +71,7 @@ export async function updateItem(
       source: d.source || null,
       status: d.status,
       notes: d.notes || null,
+      timeSpentMinutes: d.timeSpentMinutes ?? 0,
       updatedAt: new Date(),
     })
     .where(and(eq(trainingItems.id, itemId), eq(trainingItems.userId, userId)))

@@ -1,0 +1,1 @@
+ALTER TABLE "training_items" ADD COLUMN "time_spent_minutes" integer DEFAULT 0 NOT NULL;

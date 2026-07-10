@@ -3,7 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { requireUserId } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { trainingItems } from "@/lib/db/schema";
-import { typeLabel, STATUS_OPTIONS } from "@/lib/formation";
+import { typeLabel, formatMinutes, STATUS_OPTIONS } from "@/lib/formation";
 
 export default async function TrainingPage() {
   const userId = await requireUserId();
@@ -16,6 +16,7 @@ export default async function TrainingPage() {
     ...s,
     items: items.filter((i) => i.status === s.value),
   }));
+  const totalMinutes = items.reduce((sum, i) => sum + i.timeSpentMinutes, 0);
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
@@ -32,12 +33,17 @@ export default async function TrainingPage() {
       </header>
 
       <main className="mx-auto max-w-3xl px-6 py-16">
-        <h2 className="mb-8 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
+        <h2 className="mb-1 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
           Formation
         </h2>
+        {items.length > 0 && (
+          <p className="mb-8 text-sm text-neutral-500">
+            Temps total investi : {formatMinutes(totalMinutes)}
+          </p>
+        )}
 
         {items.length === 0 && (
-          <p className="text-neutral-500">
+          <p className="mt-8 text-neutral-500">
             Aucune formation pour l&apos;instant.{" "}
             <Link href="/formation/new" className="underline">
               Ajoute la première
@@ -65,7 +71,10 @@ export default async function TrainingPage() {
                           <span className="font-medium text-neutral-900 dark:text-neutral-100">{item.title}</span>
                           {item.source && <span className="ml-2 text-xs text-neutral-400">{item.source}</span>}
                         </div>
-                        <span className="text-xs text-neutral-500">{typeLabel(item.type)}</span>
+                        <div className="flex items-center gap-3 text-xs text-neutral-500">
+                          {item.timeSpentMinutes > 0 && <span>{formatMinutes(item.timeSpentMinutes)}</span>}
+                          <span>{typeLabel(item.type)}</span>
+                        </div>
                       </Link>
                     ))}
                   </div>

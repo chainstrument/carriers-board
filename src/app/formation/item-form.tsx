@@ -56,11 +56,27 @@ export function ItemForm({
         <input id="title" name="title" required defaultValue={defaultValues?.title} className={inputClass} />
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="source" className="text-sm text-neutral-600 dark:text-neutral-400">
-          Source (lien, référence...)
-        </label>
-        <input id="source" name="source" defaultValue={defaultValues?.source ?? ""} className={inputClass} />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1">
+          <label htmlFor="source" className="text-sm text-neutral-600 dark:text-neutral-400">
+            Source (lien, référence...)
+          </label>
+          <input id="source" name="source" defaultValue={defaultValues?.source ?? ""} className={inputClass} />
+        </div>
+
+        <div className="space-y-1">
+          <label htmlFor="timeSpentMinutes" className="text-sm text-neutral-600 dark:text-neutral-400">
+            Temps passé (minutes)
+          </label>
+          <input
+            id="timeSpentMinutes"
+            name="timeSpentMinutes"
+            type="number"
+            min={0}
+            defaultValue={defaultValues?.timeSpentMinutes ?? 0}
+            className={inputClass}
+          />
+        </div>
       </div>
 
       <div className="space-y-1">
