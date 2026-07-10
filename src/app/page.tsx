@@ -4,21 +4,36 @@ import { requireUserId } from "@/lib/auth-helpers";
 import { getCurrentExperience, getRecentSatisfaction } from "@/lib/dashboard";
 import { computeNetEstimate, computePackageTotal, formatEuros, getNetEstimateRatio } from "@/lib/package";
 import { averageScore } from "@/lib/satisfaction";
+import { computeRiskLevel, getStaleKeyCompetencesCount } from "@/lib/risk";
 import { durationLabel } from "./experiences/date-range";
 import { WidgetCard } from "@/components/widget-card";
 import { logout } from "./logout/actions";
 
 const monthFormatter = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
 
+const RISK_STYLES = {
+  faible: "text-green-600 dark:text-green-500",
+  modere: "text-amber-600 dark:text-amber-500",
+  eleve: "text-red-600 dark:text-red-500",
+};
+
+const RISK_LABELS = { faible: "Faible", modere: "Modéré", eleve: "Élevé" };
+
 export default async function Home() {
   const session = await auth();
   const userId = await requireUserId();
-  const [currentExperience, netEstimateRatio, recentSatisfaction] = await Promise.all([
+  const [currentExperience, netEstimateRatio, recentSatisfaction, staleKeyCompetencesCount] = await Promise.all([
     getCurrentExperience(userId),
     getNetEstimateRatio(userId),
     getRecentSatisfaction(userId),
+    getStaleKeyCompetencesCount(),
   ]);
   const [latestSatisfaction, previousSatisfaction] = recentSatisfaction;
+  const risk = computeRiskLevel({
+    currentExperience: currentExperience ?? null,
+    recentSatisfaction,
+    staleKeyCompetencesCount,
+  });
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
@@ -98,6 +113,19 @@ export default async function Home() {
               </div>
             ) : (
               <p className="text-sm text-neutral-500">Aucune évaluation pour l&apos;instant.</p>
+            )}
+          </WidgetCard>
+
+          <WidgetCard title="Niveau de risque">
+            <p className={`text-lg font-semibold ${RISK_STYLES[risk.level]}`}>{RISK_LABELS[risk.level]}</p>
+            {risk.reasons.length > 0 ? (
+              <ul className="mt-2 space-y-1 text-xs text-neutral-500">
+                {risk.reasons.map((reason) => (
+                  <li key={reason}>• {reason}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-xs text-neutral-500">Rien à signaler pour l&apos;instant.</p>
             )}
           </WidgetCard>
         </div>
