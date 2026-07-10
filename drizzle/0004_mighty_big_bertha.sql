@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "net_estimate_ratio" real DEFAULT 0.78 NOT NULL;

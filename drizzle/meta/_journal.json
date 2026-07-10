@@ -29,6 +29,13 @@
       "when": 1783704239242,
       "tag": "0003_warm_kate_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1783704374445,
+      "tag": "0004_mighty_big_bertha",
+      "breakpoints": true
     }
   ]
 }

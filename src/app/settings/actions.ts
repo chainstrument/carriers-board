@@ -29,3 +29,25 @@ export async function updateTheme(
   revalidatePath("/", "layout");
   return { success: "Thème mis à jour." };
 }
+
+const netEstimateRatioSchema = z.coerce.number().min(0.1).max(1);
+
+export async function updateNetEstimateRatio(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Non authentifié." };
+
+  const parsed = netEstimateRatioSchema.safeParse(formData.get("netEstimateRatio"));
+  if (!parsed.success) return { error: "Coefficient invalide (entre 0.1 et 1)." };
+
+  await db
+    .update(users)
+    .set({ netEstimateRatio: parsed.data, updatedAt: new Date() })
+    .where(eq(users.id, session.user.id));
+
+  revalidatePath("/experiences");
+  revalidatePath("/package");
+  return { success: "Coefficient mis à jour." };
+}

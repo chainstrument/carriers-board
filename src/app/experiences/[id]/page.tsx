@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUserId } from "@/lib/auth-helpers";
 import { getExperienceWithTech } from "@/lib/experiences";
+import { computeNetEstimate, computePackageTotal, formatEuros, getNetEstimateRatio } from "@/lib/package";
 import { formatDateRange, durationLabel } from "../date-range";
 import { deleteExperience } from "../actions";
 
@@ -20,6 +21,8 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
   const userId = await requireUserId();
   const experience = await getExperienceWithTech(userId, id);
   if (!experience) notFound();
+
+  const netEstimateRatio = experience.salaryPackage ? await getNetEstimateRatio(userId) : null;
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
@@ -84,7 +87,18 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
               {experience.salaryPackage ? "Modifier" : "Configurer"}
             </Link>
           </div>
-          {!experience.salaryPackage && (
+          {experience.salaryPackage && netEstimateRatio !== null ? (
+            <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+              <dt className="text-neutral-500">Package annuel</dt>
+              <dd className="text-right font-medium text-neutral-900 dark:text-neutral-100">
+                {formatEuros(computePackageTotal(experience.salaryPackage))}
+              </dd>
+              <dt className="text-neutral-500">Net estimé</dt>
+              <dd className="text-right font-medium text-neutral-900 dark:text-neutral-100">
+                {formatEuros(computeNetEstimate(experience.salaryPackage, netEstimateRatio))}
+              </dd>
+            </dl>
+          ) : (
             <p className="mt-1 text-sm text-neutral-500">Pas encore configuré.</p>
           )}
         </div>

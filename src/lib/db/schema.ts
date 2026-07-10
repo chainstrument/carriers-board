@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { date, integer, pgEnum, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { date, integer, pgEnum, pgTable, primaryKey, real, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const themeEnum = pgEnum("theme", ["light", "dark", "dev"]);
 
@@ -10,6 +10,10 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash").notNull(),
   image: text("image"),
   theme: themeEnum("theme").notNull().default("light"),
+  // Coefficient approximatif net/brut pour l'estimation du net (Epic 4) —
+  // pas un vrai moteur de paie, juste un ordre de grandeur ajustable par
+  // l'utilisateur dans les paramètres.
+  netEstimateRatio: real("net_estimate_ratio").notNull().default(0.78),
   resetToken: text("reset_token"),
   resetTokenExpiresAt: timestamp("reset_token_expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
