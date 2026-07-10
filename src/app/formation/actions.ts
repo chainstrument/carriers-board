@@ -15,6 +15,7 @@ const itemSchema = z.object({
   title: z.string().min(1, "Le titre est requis."),
   source: z.string().optional(),
   status: z.enum(["todo", "in_progress", "done"]),
+  notes: z.string().optional(),
 });
 
 function parsedData(formData: FormData) {
@@ -23,6 +24,7 @@ function parsedData(formData: FormData) {
     title: formData.get("title"),
     source: formData.get("source") || undefined,
     status: formData.get("status"),
+    notes: formData.get("notes") || undefined,
   });
 }
 
@@ -41,6 +43,7 @@ export async function createItem(
     title: d.title,
     source: d.source || null,
     status: d.status,
+    notes: d.notes || null,
   });
 
   revalidatePath("/formation");
@@ -64,6 +67,7 @@ export async function updateItem(
       title: d.title,
       source: d.source || null,
       status: d.status,
+      notes: d.notes || null,
       updatedAt: new Date(),
     })
     .where(and(eq(trainingItems.id, itemId), eq(trainingItems.userId, userId)))

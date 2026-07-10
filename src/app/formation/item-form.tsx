@@ -63,6 +63,19 @@ export function ItemForm({
         <input id="source" name="source" defaultValue={defaultValues?.source ?? ""} className={inputClass} />
       </div>
 
+      <div className="space-y-1">
+        <label htmlFor="notes" className="text-sm text-neutral-600 dark:text-neutral-400">
+          Notes
+        </label>
+        <textarea
+          id="notes"
+          name="notes"
+          rows={4}
+          defaultValue={defaultValues?.notes ?? ""}
+          className={inputClass}
+        />
+      </div>
+
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
 
       <button

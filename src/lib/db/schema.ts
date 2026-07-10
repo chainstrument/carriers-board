@@ -365,6 +365,7 @@ export const trainingItems = pgTable("training_items", {
   title: text("title").notNull(),
   source: text("source"),
   status: trainingStatusEnum("status").notNull().default("todo"),
+  notes: text("notes"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
