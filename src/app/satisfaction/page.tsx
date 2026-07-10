@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { asc, eq } from "drizzle-orm";
 import { requireUserId } from "@/lib/auth-helpers";
-import { listSatisfactionEntries, averageScore, CRITERIA } from "@/lib/satisfaction";
+import { db } from "@/lib/db";
+import { satisfactionEntries } from "@/lib/db/schema";
+import { averageScore, CRITERIA } from "@/lib/satisfaction";
 import { Sparkline } from "@/components/sparkline";
 
 const monthFormatter = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
@@ -8,7 +11,10 @@ const shortMonthFormatter = new Intl.DateTimeFormat("fr-FR", { month: "short", y
 
 export default async function SatisfactionPage() {
   const userId = await requireUserId();
-  const entries = await listSatisfactionEntries(userId);
+  const entries = await db.query.satisfactionEntries.findMany({
+    where: eq(satisfactionEntries.userId, userId),
+    orderBy: [asc(satisfactionEntries.month)],
+  });
   const sorted = [...entries].reverse(); // most recent first for the list
 
   return (

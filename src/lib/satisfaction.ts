@@ -1,6 +1,4 @@
-import { asc, eq } from "drizzle-orm";
-import { db } from "@/lib/db";
-import { satisfactionEntries, type SatisfactionEntry } from "@/lib/db/schema";
+import type { SatisfactionEntry } from "@/lib/db/schema";
 
 export const CRITERIA: { key: keyof SatisfactionEntry; label: string }[] = [
   { key: "stress", label: "Stress" },
@@ -18,11 +16,4 @@ export const CRITERIA: { key: keyof SatisfactionEntry; label: string }[] = [
 export function averageScore(entry: SatisfactionEntry): number {
   const sum = CRITERIA.reduce((acc, c) => acc + (entry[c.key] as number), 0);
   return sum / CRITERIA.length;
-}
-
-export async function listSatisfactionEntries(userId: string) {
-  return db.query.satisfactionEntries.findMany({
-    where: eq(satisfactionEntries.userId, userId),
-    orderBy: [asc(satisfactionEntries.month)],
-  });
 }
