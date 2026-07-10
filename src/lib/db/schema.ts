@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { date, integer, pgEnum, pgTable, primaryKey, real, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, date, integer, pgEnum, pgTable, primaryKey, real, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const themeEnum = pgEnum("theme", ["light", "dark", "dev"]);
 
@@ -35,6 +35,17 @@ export const competences = pgTable("competences", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull().unique(),
   category: text("category"),
+  // Niveau et confiance sur une échelle 1-5 (débutant à expert), plutôt
+  // que 1-10 comme la satisfaction (Epic 8) : c'est l'usage courant pour
+  // une auto-évaluation de compétence, plus intuitif que 10 crans.
+  level: integer("level"),
+  confidence: integer("confidence"),
+  yearsOfExperience: integer("years_of_experience"),
+  wantsToImprove: boolean("wants_to_improve").notNull().default(false),
+  // Fallback manuel utilisé uniquement quand la compétence n'est reliée à
+  // aucune expérience : sinon la "dernière utilisation" est dérivée des
+  // expériences liées (voir src/lib/competences.ts).
+  manualLastUsedAt: date("manual_last_used_at"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
