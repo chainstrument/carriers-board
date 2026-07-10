@@ -6,7 +6,7 @@ export async function listProjectsWithTech(userId: string) {
   const rows = await db.query.projects.findMany({
     where: eq(projects.userId, userId),
     orderBy: [desc(projects.createdAt)],
-    with: { projectCompetences: { with: { competence: true } } },
+    with: { projectCompetences: { with: { competence: true } }, experience: true },
   });
 
   return rows.map((row) => ({
@@ -18,7 +18,7 @@ export async function listProjectsWithTech(userId: string) {
 export async function getProjectWithTech(userId: string, projectId: string) {
   const row = await db.query.projects.findFirst({
     where: and(eq(projects.id, projectId), eq(projects.userId, userId)),
-    with: { projectCompetences: { with: { competence: true } } },
+    with: { projectCompetences: { with: { competence: true } }, experience: true },
   });
   if (!row) return null;
 

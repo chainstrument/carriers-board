@@ -286,6 +286,9 @@ export const projects = pgTable("projects", {
   // 1-5, même échelle que le niveau/la confiance des compétences.
   difficulty: integer("difficulty"),
   impact: text("impact"),
+  // Nullable : un projet réalisé dans le cadre d'un poste (fields), ou un
+  // side project autonome (null) — un seul modèle plutôt que deux.
+  experienceId: uuid("experience_id").references(() => experiences.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -306,8 +309,12 @@ export const projectCompetences = pgTable(
   (table) => [primaryKey({ columns: [table.projectId, table.competenceId] })],
 );
 
-export const projectsRelations = relations(projects, ({ many }) => ({
+export const projectsRelations = relations(projects, ({ many, one }) => ({
   projectCompetences: many(projectCompetences),
+  experience: one(experiences, {
+    fields: [projects.experienceId],
+    references: [experiences.id],
+  }),
 }));
 
 export const projectCompetencesRelations = relations(projectCompetences, ({ one }) => ({

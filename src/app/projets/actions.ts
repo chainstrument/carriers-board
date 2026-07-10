@@ -16,6 +16,7 @@ const projectSchema = z.object({
   duration: z.string().optional(),
   difficulty: z.coerce.number().int().min(1).max(5).optional(),
   impact: z.string().optional(),
+  experienceId: z.string().uuid().optional(),
   technologies: z.string().optional(),
 });
 
@@ -51,6 +52,7 @@ function parsedData(formData: FormData) {
     duration: formData.get("duration") || undefined,
     difficulty: formData.get("difficulty") || undefined,
     impact: formData.get("impact") || undefined,
+    experienceId: formData.get("experienceId") || undefined,
     technologies: formData.get("technologies") || undefined,
   });
 }
@@ -73,6 +75,7 @@ export async function createProject(
       duration: d.duration || null,
       difficulty: d.difficulty ?? null,
       impact: d.impact || null,
+      experienceId: d.experienceId || null,
     })
     .returning();
 
@@ -100,6 +103,7 @@ export async function updateProject(
       duration: d.duration || null,
       difficulty: d.difficulty ?? null,
       impact: d.impact || null,
+      experienceId: d.experienceId || null,
       updatedAt: new Date(),
     })
     .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))

@@ -12,11 +12,13 @@ export function ProjectForm({
   action,
   defaultValues,
   defaultTechnologies = [],
+  experiences = [],
   submitLabel,
 }: {
   action: (prevState: ActionState, formData: FormData) => Promise<ActionState>;
   defaultValues?: Project;
   defaultTechnologies?: string[];
+  experiences?: { id: string; company: string; title: string }[];
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
@@ -63,6 +65,27 @@ export function ProjectForm({
           />
         </div>
       </div>
+
+      {experiences.length > 0 && (
+        <div className="space-y-1">
+          <label htmlFor="experienceId" className="text-sm text-neutral-600 dark:text-neutral-400">
+            Rattaché à une expérience
+          </label>
+          <select
+            id="experienceId"
+            name="experienceId"
+            defaultValue={defaultValues?.experienceId ?? ""}
+            className={inputClass}
+          >
+            <option value="">Projet autonome (side project)</option>
+            {experiences.map((exp) => (
+              <option key={exp.id} value={exp.id}>
+                {exp.title} — {exp.company}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <TagInput
         name="technologies"

@@ -53,6 +53,19 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           </p>
         )}
 
+        <p className="text-sm text-neutral-500">
+          {project.experience ? (
+            <>
+              Réalisé dans le cadre de{" "}
+              <Link href={`/experiences/${project.experience.id}`} className="underline">
+                {project.experience.title} — {project.experience.company}
+              </Link>
+            </>
+          ) : (
+            "Projet autonome (side project)"
+          )}
+        </p>
+
         {project.technologies.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {project.technologies.map((tech) => (

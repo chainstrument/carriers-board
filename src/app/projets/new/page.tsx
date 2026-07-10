@@ -1,8 +1,13 @@
 import Link from "next/link";
+import { requireUserId } from "@/lib/auth-helpers";
+import { listExperiencesSummary } from "@/lib/experiences";
 import { createProject } from "../actions";
 import { ProjectForm } from "../project-form";
 
-export default function NewProjectPage() {
+export default async function NewProjectPage() {
+  const userId = await requireUserId();
+  const experiences = await listExperiencesSummary(userId);
+
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
       <header className="flex items-center justify-between border-b border-neutral-200 px-6 py-4 dark:border-neutral-800">
@@ -18,7 +23,7 @@ export default function NewProjectPage() {
         <h2 className="mb-8 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
           Nouveau projet
         </h2>
-        <ProjectForm action={createProject} submitLabel="Créer" />
+        <ProjectForm action={createProject} experiences={experiences} submitLabel="Créer" />
       </main>
     </div>
   );

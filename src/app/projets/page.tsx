@@ -47,6 +47,9 @@ export default async function ProjectsPage() {
                 {project.duration && <span className="text-xs text-neutral-500">{project.duration}</span>}
               </div>
               {project.client && <p className="mt-1 text-sm text-neutral-500">{project.client}</p>}
+              <p className="mt-1 text-xs text-neutral-400">
+                {project.experience ? project.experience.company : "Side project"}
+              </p>
               {project.technologies.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
                   {project.technologies.map((tech) => (
