@@ -155,6 +155,9 @@ export const journalEntries = pgTable("journal_entries", {
   // autres échelles courtes de l'app (compétences). Nullable : noter son
   // humeur reste optionnel, l'essentiel est d'écrire la note.
   mood: integer("mood"),
+  // "set null" plutôt que "cascade" : supprimer une expérience ne doit pas
+  // effacer les notes de journal qui y faisaient référence, juste délier.
+  experienceId: uuid("experience_id").references(() => experiences.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -187,8 +190,12 @@ export const journalEntryTags = pgTable(
   (table) => [primaryKey({ columns: [table.journalEntryId, table.tagId] })],
 );
 
-export const journalEntriesRelations = relations(journalEntries, ({ many }) => ({
+export const journalEntriesRelations = relations(journalEntries, ({ many, one }) => ({
   journalEntryTags: many(journalEntryTags),
+  experience: one(experiences, {
+    fields: [journalEntries.experienceId],
+    references: [experiences.id],
+  }),
 }));
 
 export const tagsRelations = relations(tags, ({ many }) => ({

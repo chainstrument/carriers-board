@@ -15,6 +15,14 @@ export async function listExperiencesWithTech(userId: string) {
   }));
 }
 
+export async function listExperiencesSummary(userId: string) {
+  return db.query.experiences.findMany({
+    where: eq(experiences.userId, userId),
+    orderBy: [desc(experiences.startDate)],
+    columns: { id: true, company: true, title: true },
+  });
+}
+
 export async function listExperiencesWithPackage(userId: string) {
   return db.query.experiences.findMany({
     where: eq(experiences.userId, userId),

@@ -14,11 +14,13 @@ export function EntryForm({
   action,
   defaultValues,
   defaultTags = [],
+  experiences = [],
   submitLabel,
 }: {
   action: (prevState: ActionState, formData: FormData) => Promise<ActionState>;
   defaultValues?: JournalEntry;
   defaultTags?: string[];
+  experiences?: { id: string; company: string; title: string }[];
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
@@ -75,6 +77,27 @@ export function EntryForm({
           ))}
         </div>
       </div>
+
+      {experiences.length > 0 && (
+        <div className="space-y-1">
+          <label htmlFor="experienceId" className="text-sm text-neutral-600 dark:text-neutral-400">
+            Entreprise / expérience liée
+          </label>
+          <select
+            id="experienceId"
+            name="experienceId"
+            defaultValue={defaultValues?.experienceId ?? ""}
+            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+          >
+            <option value="">Aucune</option>
+            {experiences.map((exp) => (
+              <option key={exp.id} value={exp.id}>
+                {exp.title} — {exp.company}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <TagInput name="tags" label="Tags" placeholder="rachat, conflit, fierté..." defaultTags={defaultTags} />
 

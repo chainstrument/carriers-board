@@ -14,6 +14,7 @@ const entrySchema = z.object({
   entryDate: z.string().min(1, "La date est requise."),
   content: z.string().min(1, "Le contenu est requis."),
   mood: z.coerce.number().int().min(1).max(5).optional(),
+  experienceId: z.string().uuid().optional(),
   tags: z.string().optional(),
 });
 
@@ -45,6 +46,7 @@ function parsedData(formData: FormData) {
     entryDate: formData.get("entryDate"),
     content: formData.get("content"),
     mood: formData.get("mood") || undefined,
+    experienceId: formData.get("experienceId") || undefined,
     tags: formData.get("tags") || undefined,
   });
 }
@@ -64,6 +66,7 @@ export async function createEntry(
       entryDate: parsed.data.entryDate,
       content: parsed.data.content,
       mood: parsed.data.mood ?? null,
+      experienceId: parsed.data.experienceId ?? null,
     })
     .returning();
 
@@ -88,6 +91,7 @@ export async function updateEntry(
       entryDate: parsed.data.entryDate,
       content: parsed.data.content,
       mood: parsed.data.mood ?? null,
+      experienceId: parsed.data.experienceId ?? null,
       updatedAt: new Date(),
     })
     .where(and(eq(journalEntries.id, entryId), eq(journalEntries.userId, userId)))

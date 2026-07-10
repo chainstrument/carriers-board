@@ -48,6 +48,11 @@ export default async function JournalPage() {
                 <p className="flex items-center gap-2 text-xs text-neutral-500">
                   {dateFormatter.format(new Date(entry.entryDate))}
                   {moodEmoji(entry.mood) && <span>{moodEmoji(entry.mood)}</span>}
+                  {entry.experience && (
+                    <span className="rounded-full bg-neutral-100 px-2 py-0.5 dark:bg-neutral-800">
+                      {entry.experience.company}
+                    </span>
+                  )}
                 </p>
                 <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-800 dark:text-neutral-200">
                   {entry.content}

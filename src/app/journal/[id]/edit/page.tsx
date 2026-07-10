@@ -2,13 +2,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUserId } from "@/lib/auth-helpers";
 import { getJournalEntry } from "@/lib/journal";
+import { listExperiencesSummary } from "@/lib/experiences";
 import { updateEntry, deleteEntry } from "../../actions";
 import { EntryForm } from "../../entry-form";
 
 export default async function EditJournalEntryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const userId = await requireUserId();
-  const entry = await getJournalEntry(userId, id);
+  const [entry, experiences] = await Promise.all([
+    getJournalEntry(userId, id),
+    listExperiencesSummary(userId),
+  ]);
   if (!entry) notFound();
 
   return (
@@ -31,6 +35,7 @@ export default async function EditJournalEntryPage({ params }: { params: Promise
             action={updateEntry.bind(null, entry.id)}
             defaultValues={entry}
             defaultTags={entry.tags}
+            experiences={experiences}
             submitLabel="Enregistrer"
           />
         </div>
