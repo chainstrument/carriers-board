@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { requireUserId } from "@/lib/auth-helpers";
 import { getCurrentExperience } from "@/lib/dashboard";
+import { computeNetEstimate, computePackageTotal, formatEuros, getNetEstimateRatio } from "@/lib/package";
 import { durationLabel } from "./experiences/date-range";
 import { WidgetCard } from "@/components/widget-card";
 import { logout } from "./logout/actions";
@@ -9,7 +10,10 @@ import { logout } from "./logout/actions";
 export default async function Home() {
   const session = await auth();
   const userId = await requireUserId();
-  const currentExperience = await getCurrentExperience(userId);
+  const [currentExperience, netEstimateRatio] = await Promise.all([
+    getCurrentExperience(userId),
+    getNetEstimateRatio(userId),
+  ]);
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
@@ -51,6 +55,21 @@ export default async function Home() {
               </div>
             ) : (
               <p className="text-sm text-neutral-500">Aucun poste actuel renseigné.</p>
+            )}
+          </WidgetCard>
+
+          <WidgetCard title="Package" href={currentExperience ? `/experiences/${currentExperience.id}/package` : undefined}>
+            {currentExperience?.salaryPackage ? (
+              <div>
+                <p className="font-medium text-neutral-900 dark:text-neutral-100">
+                  {formatEuros(computePackageTotal(currentExperience.salaryPackage))} / an
+                </p>
+                <p className="text-sm text-neutral-500">
+                  ≈ {formatEuros(computeNetEstimate(currentExperience.salaryPackage, netEstimateRatio))} net estimé
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-neutral-500">Package pas encore configuré.</p>
             )}
           </WidgetCard>
         </div>
