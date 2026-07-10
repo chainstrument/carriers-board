@@ -18,7 +18,7 @@ export async function listExperiencesWithTech(userId: string) {
 export async function getExperienceWithTech(userId: string, experienceId: string) {
   const row = await db.query.experiences.findFirst({
     where: and(eq(experiences.id, experienceId), eq(experiences.userId, userId)),
-    with: { experienceCompetences: { with: { competence: true } } },
+    with: { experienceCompetences: { with: { competence: true } }, salaryPackage: true },
   });
   if (!row) return null;
 

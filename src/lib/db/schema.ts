@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { date, pgEnum, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { date, integer, pgEnum, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const themeEnum = pgEnum("theme", ["light", "dark", "dev"]);
 
@@ -74,8 +74,37 @@ export const experienceCompetences = pgTable(
   (table) => [primaryKey({ columns: [table.experienceId, table.competenceId] })],
 );
 
-export const experiencesRelations = relations(experiences, ({ many }) => ({
+// Tous les montants sont annuels et en euros entiers (pas de centimes) :
+// suffisant pour des ordres de grandeur de salaire, évite les soucis
+// d'arrondi flottant en JS.
+export const salaryPackages = pgTable("salary_packages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  experienceId: uuid("experience_id")
+    .notNull()
+    .unique()
+    .references(() => experiences.id, { onDelete: "cascade" }),
+  baseSalary: integer("base_salary").notNull(),
+  bonus: integer("bonus").notNull().default(0),
+  profitSharing: integer("profit_sharing").notNull().default(0),
+  profitIncentive: integer("profit_incentive").notNull().default(0),
+  mealVouchersAnnual: integer("meal_vouchers_annual").notNull().default(0),
+  healthInsuranceAnnual: integer("health_insurance_annual").notNull().default(0),
+  transportAnnual: integer("transport_annual").notNull().default(0),
+  benefitsInKindAnnual: integer("benefits_in_kind_annual").notNull().default(0),
+  rttDays: integer("rtt_days").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type SalaryPackage = typeof salaryPackages.$inferSelect;
+export type NewSalaryPackage = typeof salaryPackages.$inferInsert;
+
+export const experiencesRelations = relations(experiences, ({ many, one }) => ({
   experienceCompetences: many(experienceCompetences),
+  salaryPackage: one(salaryPackages, {
+    fields: [experiences.id],
+    references: [salaryPackages.experienceId],
+  }),
 }));
 
 export const competencesRelations = relations(competences, ({ many }) => ({
@@ -90,5 +119,12 @@ export const experienceCompetencesRelations = relations(experienceCompetences, (
   competence: one(competences, {
     fields: [experienceCompetences.competenceId],
     references: [competences.id],
+  }),
+}));
+
+export const salaryPackagesRelations = relations(salaryPackages, ({ one }) => ({
+  experience: one(experiences, {
+    fields: [salaryPackages.experienceId],
+    references: [experiences.id],
   }),
 }));

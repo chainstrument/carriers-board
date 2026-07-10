@@ -77,6 +77,18 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
           </div>
         )}
 
+        <div className="rounded-lg border border-neutral-200 p-6 dark:border-neutral-800">
+          <div className="flex items-center justify-between">
+            <h3 className="font-medium text-neutral-900 dark:text-neutral-100">Package salarial</h3>
+            <Link href={`/experiences/${experience.id}/package`} className="text-sm underline">
+              {experience.salaryPackage ? "Modifier" : "Configurer"}
+            </Link>
+          </div>
+          {!experience.salaryPackage && (
+            <p className="mt-1 text-sm text-neutral-500">Pas encore configuré.</p>
+          )}
+        </div>
+
         <div className="space-y-4 rounded-lg border border-neutral-200 p-6 dark:border-neutral-800">
           <Section title="Missions" content={experience.missions} />
           <Section title="Points positifs" content={experience.positives} />
