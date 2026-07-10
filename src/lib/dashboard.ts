@@ -1,6 +1,6 @@
-import { and, desc, isNull, eq } from "drizzle-orm";
+import { and, desc, isNotNull, isNull, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { experiences, journalEntries, satisfactionEntries } from "@/lib/db/schema";
+import { competences, experiences, journalEntries, satisfactionEntries } from "@/lib/db/schema";
 
 export async function getCurrentExperience(userId: string) {
   return db.query.experiences.findFirst({
@@ -22,6 +22,14 @@ export async function getRecentJournalEntries(userId: string, limit = 3) {
   return db.query.journalEntries.findMany({
     where: eq(journalEntries.userId, userId),
     orderBy: [desc(journalEntries.entryDate), desc(journalEntries.createdAt)],
+    limit,
+  });
+}
+
+export async function getTopCompetences(limit = 5) {
+  return db.query.competences.findMany({
+    where: isNotNull(competences.level),
+    orderBy: [desc(competences.level), desc(competences.confidence)],
     limit,
   });
 }

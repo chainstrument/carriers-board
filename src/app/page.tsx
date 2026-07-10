@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { requireUserId } from "@/lib/auth-helpers";
-import { getCurrentExperience, getRecentSatisfaction, getRecentJournalEntries } from "@/lib/dashboard";
+import { getCurrentExperience, getRecentSatisfaction, getRecentJournalEntries, getTopCompetences } from "@/lib/dashboard";
 import { computeNetEstimate, computePackageTotal, formatEuros, getNetEstimateRatio } from "@/lib/package";
 import { averageScore } from "@/lib/satisfaction";
 import { computeRiskLevel, getStaleKeyCompetencesCount } from "@/lib/risk";
 import { durationLabel } from "./experiences/date-range";
 import { WidgetCard } from "@/components/widget-card";
+import { LevelDots } from "@/components/level-dots";
 import { logout } from "./logout/actions";
 
 const monthFormatter = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
@@ -22,14 +23,21 @@ const RISK_LABELS = { faible: "Faible", modere: "Modéré", eleve: "Élevé" };
 export default async function Home() {
   const session = await auth();
   const userId = await requireUserId();
-  const [currentExperience, netEstimateRatio, recentSatisfaction, staleKeyCompetencesCount, recentJournalEntries] =
-    await Promise.all([
-      getCurrentExperience(userId),
-      getNetEstimateRatio(userId),
-      getRecentSatisfaction(userId),
-      getStaleKeyCompetencesCount(),
-      getRecentJournalEntries(userId),
-    ]);
+  const [
+    currentExperience,
+    netEstimateRatio,
+    recentSatisfaction,
+    staleKeyCompetencesCount,
+    recentJournalEntries,
+    topCompetences,
+  ] = await Promise.all([
+    getCurrentExperience(userId),
+    getNetEstimateRatio(userId),
+    getRecentSatisfaction(userId),
+    getStaleKeyCompetencesCount(),
+    getRecentJournalEntries(userId),
+    getTopCompetences(),
+  ]);
   const [latestSatisfaction, previousSatisfaction] = recentSatisfaction;
   const risk = computeRiskLevel({
     currentExperience: currentExperience ?? null,
@@ -154,6 +162,21 @@ export default async function Home() {
             <p className="text-sm text-neutral-500">
               Le suivi d&apos;objectifs arrive avec l&apos;epic Objectifs.
             </p>
+          </WidgetCard>
+
+          <WidgetCard title="Compétences principales" href="/competences">
+            {topCompetences.length > 0 ? (
+              <ul className="space-y-2">
+                {topCompetences.map((c) => (
+                  <li key={c.id} className="flex items-center justify-between text-sm">
+                    <span className="text-neutral-700 dark:text-neutral-300">{c.name}</span>
+                    <LevelDots value={c.level} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-neutral-500">Aucune compétence notée pour l&apos;instant.</p>
+            )}
           </WidgetCard>
         </div>
 
