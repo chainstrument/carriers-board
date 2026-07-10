@@ -2,9 +2,20 @@
 
 import { useState } from "react";
 
-export function TechTagInput({ defaultTags = [] }: { defaultTags?: string[] }) {
+export function TagInput({
+  name,
+  label,
+  placeholder,
+  defaultTags = [],
+}: {
+  name: string;
+  label: string;
+  placeholder?: string;
+  defaultTags?: string[];
+}) {
   const [tags, setTags] = useState<string[]>(defaultTags);
   const [draft, setDraft] = useState("");
+  const inputId = `${name}-input`;
 
   function addTag(value: string) {
     const trimmed = value.trim();
@@ -23,8 +34,8 @@ export function TechTagInput({ defaultTags = [] }: { defaultTags?: string[] }) {
 
   return (
     <div className="space-y-1">
-      <label htmlFor="tech-input" className="text-sm text-neutral-600 dark:text-neutral-400">
-        Technologies
+      <label htmlFor={inputId} className="text-sm text-neutral-600 dark:text-neutral-400">
+        {label}
       </label>
       <div className="flex flex-wrap gap-2 rounded-md border border-neutral-300 p-2 dark:border-neutral-700">
         {tags.map((tag) => (
@@ -44,17 +55,17 @@ export function TechTagInput({ defaultTags = [] }: { defaultTags?: string[] }) {
           </span>
         ))}
         <input
-          id="tech-input"
+          id={inputId}
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={() => addTag(draft)}
-          placeholder="PHP, Symfony, Docker..."
+          placeholder={placeholder}
           className="min-w-[8rem] flex-1 bg-transparent text-sm outline-none"
         />
       </div>
-      <input type="hidden" name="technologies" value={tags.join(",")} />
+      <input type="hidden" name={name} value={tags.join(",")} />
     </div>
   );
 }

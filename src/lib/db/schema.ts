@@ -157,3 +157,47 @@ export const journalEntries = pgTable("journal_entries", {
 
 export type JournalEntry = typeof journalEntries.$inferSelect;
 export type NewJournalEntry = typeof journalEntries.$inferInsert;
+
+// Tags libres du journal, distincts du catalogue de compétences : autre
+// domaine (ressenti/contexte plutôt que techno), pas de raison de les
+// mélanger dans un même référentiel.
+export const tags = pgTable("tags", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type Tag = typeof tags.$inferSelect;
+export type NewTag = typeof tags.$inferInsert;
+
+export const journalEntryTags = pgTable(
+  "journal_entry_tags",
+  {
+    journalEntryId: uuid("journal_entry_id")
+      .notNull()
+      .references(() => journalEntries.id, { onDelete: "cascade" }),
+    tagId: uuid("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade" }),
+  },
+  (table) => [primaryKey({ columns: [table.journalEntryId, table.tagId] })],
+);
+
+export const journalEntriesRelations = relations(journalEntries, ({ many }) => ({
+  journalEntryTags: many(journalEntryTags),
+}));
+
+export const tagsRelations = relations(tags, ({ many }) => ({
+  journalEntryTags: many(journalEntryTags),
+}));
+
+export const journalEntryTagsRelations = relations(journalEntryTags, ({ one }) => ({
+  journalEntry: one(journalEntries, {
+    fields: [journalEntryTags.journalEntryId],
+    references: [journalEntries.id],
+  }),
+  tag: one(tags, {
+    fields: [journalEntryTags.tagId],
+    references: [tags.id],
+  }),
+}));

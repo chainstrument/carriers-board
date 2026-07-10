@@ -2,35 +2,65 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { requireUserId } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
-import { journalEntries } from "@/lib/db/schema";
+import { journalEntries, journalEntryTags, tags } from "@/lib/db/schema";
 
 export type ActionState = { error?: string } | undefined;
 
 const entrySchema = z.object({
   entryDate: z.string().min(1, "La date est requise."),
   content: z.string().min(1, "Le contenu est requis."),
+  tags: z.string().optional(),
 });
+
+function parseTagNames(raw: string | undefined): string[] {
+  if (!raw) return [];
+  return [...new Set(raw.split(",").map((t) => t.trim()).filter(Boolean))];
+}
+
+async function syncTags(journalEntryId: string, names: string[]) {
+  await db.transaction(async (tx) => {
+    await tx.delete(journalEntryTags).where(eq(journalEntryTags.journalEntryId, journalEntryId));
+    if (names.length === 0) return;
+
+    const existing = await tx.query.tags.findMany({ where: inArray(tags.name, names) });
+    const existingNames = new Set(existing.map((t) => t.name));
+    const toCreate = names.filter((n) => !existingNames.has(n));
+
+    const created = toCreate.length
+      ? await tx.insert(tags).values(toCreate.map((name) => ({ name }))).returning()
+      : [];
+
+    const allTags = [...existing, ...created];
+    await tx.insert(journalEntryTags).values(allTags.map((t) => ({ journalEntryId, tagId: t.id })));
+  });
+}
+
+function parsedData(formData: FormData) {
+  return entrySchema.safeParse({
+    entryDate: formData.get("entryDate"),
+    content: formData.get("content"),
+    tags: formData.get("tags") || undefined,
+  });
+}
 
 export async function createEntry(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   const userId = await requireUserId();
-  const parsed = entrySchema.safeParse({
-    entryDate: formData.get("entryDate"),
-    content: formData.get("content"),
-  });
+  const parsed = parsedData(formData);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
 
-  await db.insert(journalEntries).values({
-    userId,
-    entryDate: parsed.data.entryDate,
-    content: parsed.data.content,
-  });
+  const [entry] = await db
+    .insert(journalEntries)
+    .values({ userId, entryDate: parsed.data.entryDate, content: parsed.data.content })
+    .returning();
+
+  await syncTags(entry.id, parseTagNames(parsed.data.tags));
 
   revalidatePath("/journal");
   redirect("/journal");
@@ -42,16 +72,18 @@ export async function updateEntry(
   formData: FormData,
 ): Promise<ActionState> {
   const userId = await requireUserId();
-  const parsed = entrySchema.safeParse({
-    entryDate: formData.get("entryDate"),
-    content: formData.get("content"),
-  });
+  const parsed = parsedData(formData);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
 
-  await db
+  const [updated] = await db
     .update(journalEntries)
     .set({ entryDate: parsed.data.entryDate, content: parsed.data.content, updatedAt: new Date() })
-    .where(and(eq(journalEntries.id, entryId), eq(journalEntries.userId, userId)));
+    .where(and(eq(journalEntries.id, entryId), eq(journalEntries.userId, userId)))
+    .returning();
+
+  if (!updated) return { error: "Note introuvable." };
+
+  await syncTags(entryId, parseTagNames(parsed.data.tags));
 
   revalidatePath("/journal");
   redirect("/journal");

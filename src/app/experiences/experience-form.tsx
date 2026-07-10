@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import type { ActionState } from "./actions";
-import { TechTagInput } from "./tech-tag-input";
+import { TagInput } from "@/components/tag-input";
 import type { Experience } from "@/lib/db/schema";
 
 const REMOTE_OPTIONS = [
@@ -122,7 +122,12 @@ export function ExperienceForm({
         <input id="manager" name="manager" defaultValue={defaultValues?.manager ?? ""} className={inputClass} />
       </Field>
 
-      <TechTagInput defaultTags={defaultTechnologies} />
+      <TagInput
+        name="technologies"
+        label="Technologies"
+        placeholder="PHP, Symfony, Docker..."
+        defaultTags={defaultTechnologies}
+      />
 
       <Field id="missions" label="Missions">
         <textarea id="missions" name="missions" rows={4} defaultValue={defaultValues?.missions ?? ""} className={inputClass} />

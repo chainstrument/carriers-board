@@ -50,6 +50,18 @@ export default async function JournalPage() {
                 <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-800 dark:text-neutral-200">
                   {entry.content}
                 </p>
+                {entry.tags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {entry.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </Link>
             </li>
           ))}

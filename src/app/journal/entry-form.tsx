@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import type { ActionState } from "./actions";
 import type { JournalEntry } from "@/lib/db/schema";
+import { TagInput } from "@/components/tag-input";
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -11,10 +12,12 @@ function todayIso() {
 export function EntryForm({
   action,
   defaultValues,
+  defaultTags = [],
   submitLabel,
 }: {
   action: (prevState: ActionState, formData: FormData) => Promise<ActionState>;
   defaultValues?: JournalEntry;
+  defaultTags?: string[];
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
@@ -49,6 +52,8 @@ export function EntryForm({
           className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800"
         />
       </div>
+
+      <TagInput name="tags" label="Tags" placeholder="rachat, conflit, fierté..." defaultTags={defaultTags} />
 
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
 
