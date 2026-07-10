@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { requireUserId } from "@/lib/auth-helpers";
-import { listSatisfactionEntries, averageScore } from "@/lib/satisfaction";
+import { listSatisfactionEntries, averageScore, CRITERIA } from "@/lib/satisfaction";
+import { Sparkline } from "@/components/sparkline";
 
 const monthFormatter = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
+const shortMonthFormatter = new Intl.DateTimeFormat("fr-FR", { month: "short", year: "2-digit" });
 
 export default async function SatisfactionPage() {
   const userId = await requireUserId();
@@ -36,6 +38,33 @@ export default async function SatisfactionPage() {
             </Link>
             .
           </p>
+        )}
+
+        {entries.length >= 2 && (
+          <section className="mb-12 space-y-8">
+            <div>
+              <h3 className="mb-2 text-sm font-medium text-neutral-500">
+                Évolution de la moyenne globale
+              </h3>
+              <Sparkline values={entries.map((e) => averageScore(e))} width={480} height={80} />
+              <div className="mt-1 flex justify-between text-xs text-neutral-400">
+                <span>{shortMonthFormatter.format(new Date(entries[0].month))}</span>
+                <span>{shortMonthFormatter.format(new Date(entries[entries.length - 1].month))}</span>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="mb-3 text-sm font-medium text-neutral-500">Par critère</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {CRITERIA.map((c) => (
+                  <div key={c.key} className="rounded-lg border border-neutral-200 p-3 dark:border-neutral-800">
+                    <p className="mb-1 text-xs text-neutral-500">{c.label}</p>
+                    <Sparkline values={entries.map((e) => e[c.key] as number)} width={220} height={36} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
         )}
 
         <ul className="space-y-3">
