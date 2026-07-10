@@ -34,6 +34,12 @@ export default async function Home() {
           Espace personnel connecté. Les widgets (poste actuel, package, satisfaction,
           objectifs...) arriveront avec les prochains epics.
         </p>
+        <Link
+          href="/experiences"
+          className="mt-6 inline-block rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 dark:border-neutral-700 dark:text-neutral-300"
+        >
+          Voir mon parcours professionnel →
+        </Link>
       </main>
     </div>
   );
