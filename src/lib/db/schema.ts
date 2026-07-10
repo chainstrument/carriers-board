@@ -352,3 +352,22 @@ export const projectAttachmentsRelations = relations(projectAttachments, ({ one 
     references: [projects.id],
   }),
 }));
+
+export const trainingTypeEnum = pgEnum("training_type", ["book", "course", "video", "article", "watch"]);
+export const trainingStatusEnum = pgEnum("training_status", ["todo", "in_progress", "done"]);
+
+export const trainingItems = pgTable("training_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  type: trainingTypeEnum("type").notNull(),
+  title: text("title").notNull(),
+  source: text("source"),
+  status: trainingStatusEnum("status").notNull().default("todo"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type TrainingItem = typeof trainingItems.$inferSelect;
+export type NewTrainingItem = typeof trainingItems.$inferInsert;
