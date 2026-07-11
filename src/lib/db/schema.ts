@@ -374,3 +374,31 @@ export const trainingItems = pgTable("training_items", {
 
 export type TrainingItem = typeof trainingItems.$inferSelect;
 export type NewTrainingItem = typeof trainingItems.$inferInsert;
+
+export const jobApplicationStatusEnum = pgEnum("job_application_status", [
+  "to_review",
+  "hr_contact",
+  "technical_test",
+  "offer",
+  "rejected",
+  "accepted",
+]);
+
+export const jobApplications = pgTable("job_applications", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  company: text("company").notNull(),
+  city: text("city"),
+  salary: integer("salary"),
+  remoteType: remoteTypeEnum("remote_type"),
+  link: text("link"),
+  notes: text("notes"),
+  status: jobApplicationStatusEnum("status").notNull().default("to_review"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type JobApplication = typeof jobApplications.$inferSelect;
+export type NewJobApplication = typeof jobApplications.$inferInsert;
