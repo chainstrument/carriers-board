@@ -4,7 +4,7 @@ import { requireUserId } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { jobApplications } from "@/lib/db/schema";
 import { STATUS_OPTIONS } from "@/lib/job-board";
-import { moveStatus } from "./actions";
+import { StatusSelect } from "./status-select";
 
 export default async function JobApplicationsPage() {
   const userId = await requireUserId();
@@ -13,9 +13,8 @@ export default async function JobApplicationsPage() {
     orderBy: [desc(jobApplications.createdAt)],
   });
 
-  const columns = STATUS_OPTIONS.map((s, index) => ({
+  const columns = STATUS_OPTIONS.map((s) => ({
     ...s,
-    index,
     items: applications.filter((a) => a.status === s.value),
   }));
 
@@ -55,41 +54,20 @@ export default async function JobApplicationsPage() {
                 {column.label} ({column.items.length})
               </h3>
               <div className="space-y-2">
-                {column.items.map((app) => {
-                  const previous = columns[column.index - 1];
-                  const next = columns[column.index + 1];
-                  return (
-                    <div
-                      key={app.id}
-                      className="rounded-lg border border-neutral-200 p-3 text-sm dark:border-neutral-800"
-                    >
-                      <Link href={`/candidatures/${app.id}/edit`} className="block hover:underline">
-                        <span className="font-medium text-neutral-900 dark:text-neutral-100">{app.company}</span>
-                        {app.city && <p className="text-xs text-neutral-500">{app.city}</p>}
-                      </Link>
-                      <div className="mt-2 flex justify-between">
-                        <form action={previous ? moveStatus.bind(null, app.id, previous.value) : undefined}>
-                          <button
-                            type="submit"
-                            disabled={!previous}
-                            className="text-xs text-neutral-400 hover:text-neutral-700 disabled:opacity-0 dark:hover:text-neutral-200"
-                          >
-                            ← {previous?.label}
-                          </button>
-                        </form>
-                        <form action={next ? moveStatus.bind(null, app.id, next.value) : undefined}>
-                          <button
-                            type="submit"
-                            disabled={!next}
-                            className="text-xs text-neutral-400 hover:text-neutral-700 disabled:opacity-0 dark:hover:text-neutral-200"
-                          >
-                            {next?.label} →
-                          </button>
-                        </form>
-                      </div>
+                {column.items.map((app) => (
+                  <div
+                    key={app.id}
+                    className="rounded-lg border border-neutral-200 p-3 text-sm dark:border-neutral-800"
+                  >
+                    <Link href={`/candidatures/${app.id}/edit`} className="block hover:underline">
+                      <span className="font-medium text-neutral-900 dark:text-neutral-100">{app.company}</span>
+                      {app.city && <p className="text-xs text-neutral-500">{app.city}</p>}
+                    </Link>
+                    <div className="mt-2">
+                      <StatusSelect applicationId={app.id} currentStatus={app.status} />
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             </div>
           ))}
