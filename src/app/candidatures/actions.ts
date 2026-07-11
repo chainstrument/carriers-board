@@ -6,7 +6,10 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { requireUserId } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
-import { jobApplications } from "@/lib/db/schema";
+import { jobApplications, jobApplicationStatusHistory } from "@/lib/db/schema";
+import { STATUS_OPTIONS } from "@/lib/job-board";
+
+type JobApplicationStatus = (typeof STATUS_OPTIONS)[number]["value"];
 
 export type ActionState = { error?: string } | undefined;
 
@@ -39,14 +42,22 @@ export async function createApplication(
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
   const d = parsed.data;
 
-  await db.insert(jobApplications).values({
-    userId,
-    company: d.company,
-    city: d.city || null,
-    salary: d.salary ?? null,
-    remoteType: d.remoteType || null,
-    link: d.link || null,
-    notes: d.notes || null,
+  const [application] = await db
+    .insert(jobApplications)
+    .values({
+      userId,
+      company: d.company,
+      city: d.city || null,
+      salary: d.salary ?? null,
+      remoteType: d.remoteType || null,
+      link: d.link || null,
+      notes: d.notes || null,
+    })
+    .returning();
+
+  await db.insert(jobApplicationStatusHistory).values({
+    jobApplicationId: application.id,
+    status: application.status,
   });
 
   revalidatePath("/candidatures");
@@ -91,4 +102,20 @@ export async function deleteApplication(applicationId: string) {
 
   revalidatePath("/candidatures");
   redirect("/candidatures");
+}
+
+export async function moveStatus(applicationId: string, status: JobApplicationStatus) {
+  const userId = await requireUserId();
+
+  const [updated] = await db
+    .update(jobApplications)
+    .set({ status, updatedAt: new Date() })
+    .where(and(eq(jobApplications.id, applicationId), eq(jobApplications.userId, userId)))
+    .returning();
+
+  if (!updated) return;
+
+  await db.insert(jobApplicationStatusHistory).values({ jobApplicationId: applicationId, status });
+
+  revalidatePath("/candidatures");
 }

@@ -402,3 +402,28 @@ export const jobApplications = pgTable("job_applications", {
 
 export type JobApplication = typeof jobApplications.$inferSelect;
 export type NewJobApplication = typeof jobApplications.$inferInsert;
+
+// Historique des transitions de statut plutôt qu'un champ écrasé à chaque
+// changement — nécessaire pour mesurer plus tard le temps moyen par étape
+// du pipeline (Epic Analyse).
+export const jobApplicationStatusHistory = pgTable("job_application_status_history", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  jobApplicationId: uuid("job_application_id")
+    .notNull()
+    .references(() => jobApplications.id, { onDelete: "cascade" }),
+  status: jobApplicationStatusEnum("status").notNull(),
+  changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type JobApplicationStatusHistoryEntry = typeof jobApplicationStatusHistory.$inferSelect;
+
+export const jobApplicationsRelations = relations(jobApplications, ({ many }) => ({
+  statusHistory: many(jobApplicationStatusHistory),
+}));
+
+export const jobApplicationStatusHistoryRelations = relations(jobApplicationStatusHistory, ({ one }) => ({
+  jobApplication: one(jobApplications, {
+    fields: [jobApplicationStatusHistory.jobApplicationId],
+    references: [jobApplications.id],
+  }),
+}));
