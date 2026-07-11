@@ -6,7 +6,10 @@ import { logout } from "@/app/logout/actions";
 
 const NAV_SECTIONS = [
   {
-    items: [{ href: "/", label: "Dashboard" }],
+    items: [
+      { href: "/", label: "Dashboard" },
+      { href: "/import-cv", label: "Importer un CV" },
+    ],
   },
   {
     title: "Carrière",
