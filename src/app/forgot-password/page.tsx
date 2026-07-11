@@ -5,7 +5,10 @@ import { useActionState } from "react";
 import { requestPasswordReset } from "./actions";
 
 export default function ForgotPasswordPage() {
-  const [state, formAction, pending] = useActionState(requestPasswordReset, undefined);
+  const [state, formAction, pending] = useActionState(
+    requestPasswordReset,
+    undefined,
+  );
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-neutral-50 dark:bg-neutral-950">
@@ -23,7 +26,10 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="email" className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          <label
+            htmlFor="email"
+            className="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+          >
             Email
           </label>
           <input
@@ -35,7 +41,11 @@ export default function ForgotPasswordPage() {
           />
         </div>
 
-        {state?.message && <p className="text-sm text-neutral-600 dark:text-neutral-400">{state.message}</p>}
+        {state?.message && (
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+            {state.message}
+          </p>
+        )}
 
         <button
           type="submit"
@@ -45,7 +55,10 @@ export default function ForgotPasswordPage() {
           {pending ? "Envoi..." : "Envoyer le lien"}
         </button>
 
-        <Link href="/login" className="block text-center text-sm text-neutral-500 hover:underline">
+        <Link
+          href="/login"
+          className="block text-center text-sm text-neutral-500 hover:underline"
+        >
           Retour à la connexion
         </Link>
       </form>

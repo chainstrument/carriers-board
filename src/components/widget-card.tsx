@@ -11,7 +11,9 @@ export function WidgetCard({
 }) {
   const className =
     "block h-full rounded-lg border border-neutral-200 p-4 dark:border-neutral-800" +
-    (href ? " transition-colors hover:border-neutral-400 dark:hover:border-neutral-600" : "");
+    (href
+      ? " transition-colors hover:border-neutral-400 dark:hover:border-neutral-600"
+      : "");
 
   const inner = (
     <>

@@ -34,7 +34,10 @@ export function TagInput({
 
   return (
     <div className="space-y-1">
-      <label htmlFor={inputId} className="text-sm text-neutral-600 dark:text-neutral-400">
+      <label
+        htmlFor={inputId}
+        className="text-sm text-neutral-600 dark:text-neutral-400"
+      >
         {label}
       </label>
       <div className="flex flex-wrap gap-2 rounded-md border border-neutral-300 p-2 dark:border-neutral-700">

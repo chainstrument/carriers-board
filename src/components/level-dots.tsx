@@ -1,5 +1,12 @@
-export function LevelDots({ value, max = 5 }: { value: number | null; max?: number }) {
-  if (value === null) return <span className="text-xs text-neutral-400">—</span>;
+export function LevelDots({
+  value,
+  max = 5,
+}: {
+  value: number | null;
+  max?: number;
+}) {
+  if (value === null)
+    return <span className="text-xs text-neutral-400">—</span>;
   return (
     <span className="inline-flex gap-0.5">
       {Array.from({ length: max }, (_, i) => (

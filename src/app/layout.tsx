@@ -24,7 +24,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const theme = await getCurrentTheme();
-  const themeClass = theme === "dark" ? "dark" : theme === "dev" ? "theme-dev" : "";
+  const themeClass =
+    theme === "dark" ? "dark" : theme === "dev" ? "theme-dev" : "";
 
   return (
     <html

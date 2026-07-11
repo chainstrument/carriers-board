@@ -21,7 +21,10 @@ export default function LoginPage() {
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="email" className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          <label
+            htmlFor="email"
+            className="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+          >
             Email
           </label>
           <input
@@ -35,7 +38,10 @@ export default function LoginPage() {
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="password" className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          <label
+            htmlFor="password"
+            className="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+          >
             Mot de passe
           </label>
           <input
@@ -58,7 +64,10 @@ export default function LoginPage() {
           {pending ? "Connexion..." : "Se connecter"}
         </button>
 
-        <Link href="/forgot-password" className="block text-center text-sm text-neutral-500 hover:underline">
+        <Link
+          href="/forgot-password"
+          className="block text-center text-sm text-neutral-500 hover:underline"
+        >
           Mot de passe oublié ?
         </Link>
       </form>

@@ -5,7 +5,11 @@ import { use } from "react";
 import { useActionState } from "react";
 import { resetPassword } from "./actions";
 
-export default function ResetPasswordPage({ params }: { params: Promise<{ token: string }> }) {
+export default function ResetPasswordPage({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}) {
   const { token } = use(params);
   const [state, formAction, pending] = useActionState(resetPassword, undefined);
 
@@ -37,7 +41,10 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
         <input type="hidden" name="token" value={token} />
 
         <div className="space-y-1">
-          <label htmlFor="password" className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          <label
+            htmlFor="password"
+            className="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+          >
             Nouveau mot de passe
           </label>
           <input
@@ -51,7 +58,10 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="confirmPassword" className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          <label
+            htmlFor="confirmPassword"
+            className="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+          >
             Confirmer
           </label>
           <input
