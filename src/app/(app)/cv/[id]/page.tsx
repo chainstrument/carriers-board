@@ -2,16 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUserId } from "@/lib/auth-helpers";
 import { buildCvData, cvDownloadFilename, getCvWithSelections } from "@/lib/cvs";
-import { formatDateRange } from "../../experiences/date-range";
-
-function remoteLabel(days: number | null): string | null {
-  if (days === null) return null;
-  return days === 0 ? "présentiel" : `${days} j télétravail/sem.`;
-}
-
-function formationYearLabel(startYear: number, endYear: number | null): string {
-  return endYear && endYear !== startYear ? `${startYear}-${endYear}` : String(startYear);
-}
+import { CvPreview } from "./cv-preview";
 
 export default async function CvDetailPage({
   params,
@@ -58,95 +49,13 @@ export default async function CvDetailPage({
         </div>
       </div>
 
-      <div className="space-y-6 rounded-lg border border-neutral-200 p-6 dark:border-neutral-800">
-        <div>
-          <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-            {data.userName}
-          </h3>
-          <p className="text-sm italic text-neutral-600 dark:text-neutral-400">
-            {data.title}
-          </p>
-          <p className="mt-1 text-xs text-neutral-500">
-            {[data.email, data.phone, data.address, data.linkedinUrl, data.websiteUrl]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-        </div>
+      <p className="text-xs text-neutral-400">
+        Aperçu — la mise en page ci-dessous reflète le template choisi, le
+        fichier téléchargé peut différer légèrement dans le détail.
+      </p>
 
-        {data.summary && (
-          <p className="text-sm text-neutral-800 dark:text-neutral-200">{data.summary}</p>
-        )}
-
-        {data.competences.length > 0 && (
-          <div>
-            <h4 className="mb-1 text-sm font-medium text-neutral-500">Compétences</h4>
-            <p className="text-sm text-neutral-800 dark:text-neutral-200">
-              {data.competences.join(", ")}
-            </p>
-          </div>
-        )}
-
-        {data.experiences.length > 0 && (
-          <div>
-            <h4 className="mb-2 text-sm font-medium text-neutral-500">
-              Expériences professionnelles
-            </h4>
-            <div className="space-y-4">
-              {data.experiences.map((exp, i) => (
-                <div key={i}>
-                  <p className="font-medium text-neutral-900 dark:text-neutral-100">
-                    {exp.title} — {exp.company}
-                  </p>
-                  <p className="text-xs text-neutral-500">
-                    {[
-                      formatDateRange(exp.startDate, exp.endDate),
-                      exp.location,
-                      remoteLabel(exp.remoteDaysPerWeek),
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
-                  {exp.missions && (
-                    <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-700 dark:text-neutral-300">
-                      {exp.missions}
-                    </p>
-                  )}
-                  {exp.technologies.length > 0 && (
-                    <p className="mt-1 text-xs text-neutral-500">
-                      Technologies : {exp.technologies.join(", ")}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {data.formations.length > 0 && (
-          <div>
-            <h4 className="mb-1 text-sm font-medium text-neutral-500">Formation</h4>
-            <div className="space-y-1">
-              {data.formations.map((f, i) => (
-                <p key={i} className="text-sm text-neutral-800 dark:text-neutral-200">
-                  <span className="font-medium">
-                    {f.title}
-                    {f.institution ? ` — ${f.institution}` : ""}
-                  </span>{" "}
-                  <span className="text-neutral-500">
-                    ({formationYearLabel(f.startYear, f.endYear)})
-                  </span>
-                </p>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {data.languages && (
-          <div>
-            <h4 className="mb-1 text-sm font-medium text-neutral-500">Langues</h4>
-            <p className="text-sm text-neutral-800 dark:text-neutral-200">{data.languages}</p>
-          </div>
-        )}
+      <div className="rounded-lg border border-neutral-200 p-6 dark:border-neutral-800">
+        <CvPreview data={data} />
       </div>
     </div>
   );

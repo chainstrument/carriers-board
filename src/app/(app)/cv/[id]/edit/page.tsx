@@ -21,12 +21,22 @@ export default async function EditCvPage({
   return (
     <div className="mx-auto max-w-2xl space-y-8 px-6 py-16">
       <div>
-        <Link
-          href={`/cv/${cv.id}`}
-          className="text-sm text-neutral-600 hover:underline dark:text-neutral-400"
-        >
-          ← Retour
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link
+            href={`/cv/${cv.id}`}
+            className="text-sm text-neutral-600 hover:underline dark:text-neutral-400"
+          >
+            ← Retour
+          </Link>
+          <a
+            href={`/cv/${cv.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm dark:border-neutral-700"
+          >
+            Aperçu (nouvel onglet)
+          </a>
+        </div>
         <h2 className="mb-8 mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
           Modifier le CV
         </h2>
