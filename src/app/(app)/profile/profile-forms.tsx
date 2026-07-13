@@ -7,10 +7,18 @@ export function ProfileForms({
   name,
   email,
   image,
+  phone,
+  address,
+  linkedinUrl,
+  websiteUrl,
 }: {
   name: string;
   email: string;
   image: string | null;
+  phone: string | null;
+  address: string | null;
+  linkedinUrl: string | null;
+  websiteUrl: string | null;
 }) {
   const [profileState, profileAction, profilePending] = useActionState(
     updateProfile,
@@ -73,6 +81,73 @@ export function ProfileForms({
             className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800"
           />
         </div>
+
+        <div className="space-y-1">
+          <label
+            htmlFor="phone"
+            className="text-sm text-neutral-600 dark:text-neutral-400"
+          >
+            Téléphone
+          </label>
+          <input
+            id="phone"
+            name="phone"
+            defaultValue={phone ?? ""}
+            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label
+            htmlFor="address"
+            className="text-sm text-neutral-600 dark:text-neutral-400"
+          >
+            Adresse
+          </label>
+          <input
+            id="address"
+            name="address"
+            defaultValue={address ?? ""}
+            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label
+            htmlFor="linkedinUrl"
+            className="text-sm text-neutral-600 dark:text-neutral-400"
+          >
+            LinkedIn
+          </label>
+          <input
+            id="linkedinUrl"
+            name="linkedinUrl"
+            defaultValue={linkedinUrl ?? ""}
+            placeholder="https://linkedin.com/in/..."
+            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label
+            htmlFor="websiteUrl"
+            className="text-sm text-neutral-600 dark:text-neutral-400"
+          >
+            Site / portfolio
+          </label>
+          <input
+            id="websiteUrl"
+            name="websiteUrl"
+            defaultValue={websiteUrl ?? ""}
+            placeholder="https://..."
+            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+          />
+        </div>
+
+        <p className="text-xs text-neutral-400">
+          Ces informations servent d&apos;en-tête aux CV générés dans le
+          module CV.
+        </p>
 
         {profileState?.error && (
           <p className="text-sm text-red-600">{profileState.error}</p>

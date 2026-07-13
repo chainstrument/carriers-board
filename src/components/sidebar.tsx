@@ -32,7 +32,10 @@ const NAV_SECTIONS = [
   },
   {
     title: "Recherche d'emploi",
-    items: [{ href: "/candidatures", label: "Candidatures" }],
+    items: [
+      { href: "/candidatures", label: "Candidatures" },
+      { href: "/cv", label: "CV" },
+    ],
   },
 ];
 

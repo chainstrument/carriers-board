@@ -9,6 +9,10 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   image: text("image"),
+  phone: text("phone"),
+  address: text("address"),
+  linkedinUrl: text("linkedin_url"),
+  websiteUrl: text("website_url"),
   theme: themeEnum("theme").notNull().default("light"),
   // Coefficient approximatif net/brut pour l'estimation du net (Epic 4) —
   // pas un vrai moteur de paie, juste un ordre de grandeur ajustable par
@@ -445,5 +449,96 @@ export const jobApplicationStatusHistoryRelations = relations(jobApplicationStat
   jobApplication: one(jobApplications, {
     fields: [jobApplicationStatusHistory.jobApplicationId],
     references: [jobApplications.id],
+  }),
+}));
+
+// Un CV ne stocke pas de fichier : il est régénéré à la volée (docx) à
+// partir des sections cochées ci-dessous et des données déjà en base
+// (Expériences, Compétences, Diplômes) — pas de double saisie, toujours à
+// jour si la fiche source change.
+export const cvs = pgTable("cvs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  // Nom interne pour s'y retrouver dans la liste (ex. "CV Backend - Acme").
+  name: text("name").notNull(),
+  // Titre affiché en haut du CV (ex. "Développeur Web Fullstack").
+  title: text("title").notNull(),
+  summary: text("summary"),
+  languages: text("languages"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type Cv = typeof cvs.$inferSelect;
+export type NewCv = typeof cvs.$inferInsert;
+
+export const cvExperiences = pgTable(
+  "cv_experiences",
+  {
+    cvId: uuid("cv_id")
+      .notNull()
+      .references(() => cvs.id, { onDelete: "cascade" }),
+    experienceId: uuid("experience_id")
+      .notNull()
+      .references(() => experiences.id, { onDelete: "cascade" }),
+  },
+  (table) => [primaryKey({ columns: [table.cvId, table.experienceId] })],
+);
+
+export const cvCompetences = pgTable(
+  "cv_competences",
+  {
+    cvId: uuid("cv_id")
+      .notNull()
+      .references(() => cvs.id, { onDelete: "cascade" }),
+    competenceId: uuid("competence_id")
+      .notNull()
+      .references(() => competences.id, { onDelete: "cascade" }),
+  },
+  (table) => [primaryKey({ columns: [table.cvId, table.competenceId] })],
+);
+
+export const cvAcademicFormations = pgTable(
+  "cv_academic_formations",
+  {
+    cvId: uuid("cv_id")
+      .notNull()
+      .references(() => cvs.id, { onDelete: "cascade" }),
+    academicFormationId: uuid("academic_formation_id")
+      .notNull()
+      .references(() => academicFormations.id, { onDelete: "cascade" }),
+  },
+  (table) => [primaryKey({ columns: [table.cvId, table.academicFormationId] })],
+);
+
+export const cvsRelations = relations(cvs, ({ many }) => ({
+  cvExperiences: many(cvExperiences),
+  cvCompetences: many(cvCompetences),
+  cvAcademicFormations: many(cvAcademicFormations),
+}));
+
+export const cvExperiencesRelations = relations(cvExperiences, ({ one }) => ({
+  cv: one(cvs, { fields: [cvExperiences.cvId], references: [cvs.id] }),
+  experience: one(experiences, {
+    fields: [cvExperiences.experienceId],
+    references: [experiences.id],
+  }),
+}));
+
+export const cvCompetencesRelations = relations(cvCompetences, ({ one }) => ({
+  cv: one(cvs, { fields: [cvCompetences.cvId], references: [cvs.id] }),
+  competence: one(competences, {
+    fields: [cvCompetences.competenceId],
+    references: [competences.id],
+  }),
+}));
+
+export const cvAcademicFormationsRelations = relations(cvAcademicFormations, ({ one }) => ({
+  cv: one(cvs, { fields: [cvAcademicFormations.cvId], references: [cvs.id] }),
+  academicFormation: one(academicFormations, {
+    fields: [cvAcademicFormations.academicFormationId],
+    references: [academicFormations.id],
   }),
 }));

@@ -19,7 +19,15 @@ export default async function ProfilePage() {
       <h2 className="mb-8 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
         Profil
       </h2>
-      <ProfileForms name={user.name} email={user.email} image={user.image} />
+      <ProfileForms
+        name={user.name}
+        email={user.email}
+        image={user.image}
+        phone={user.phone}
+        address={user.address}
+        linkedinUrl={user.linkedinUrl}
+        websiteUrl={user.websiteUrl}
+      />
     </div>
   );
 }

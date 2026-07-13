@@ -13,6 +13,10 @@ export type ActionState = { error?: string; success?: string } | undefined;
 const profileSchema = z.object({
   name: z.string().min(1, "Le nom est requis."),
   image: z.string().url().optional().or(z.literal("")),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+  linkedinUrl: z.string().url().optional().or(z.literal("")),
+  websiteUrl: z.string().url().optional().or(z.literal("")),
 });
 
 export async function updateProfile(
@@ -25,6 +29,10 @@ export async function updateProfile(
   const parsed = profileSchema.safeParse({
     name: formData.get("name"),
     image: formData.get("image"),
+    phone: formData.get("phone") || undefined,
+    address: formData.get("address") || undefined,
+    linkedinUrl: formData.get("linkedinUrl"),
+    websiteUrl: formData.get("websiteUrl"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
@@ -32,7 +40,15 @@ export async function updateProfile(
 
   await db
     .update(users)
-    .set({ name: parsed.data.name, image: parsed.data.image || null, updatedAt: new Date() })
+    .set({
+      name: parsed.data.name,
+      image: parsed.data.image || null,
+      phone: parsed.data.phone || null,
+      address: parsed.data.address || null,
+      linkedinUrl: parsed.data.linkedinUrl || null,
+      websiteUrl: parsed.data.websiteUrl || null,
+      updatedAt: new Date(),
+    })
     .where(eq(users.id, session.user.id));
 
   revalidatePath("/profile");
