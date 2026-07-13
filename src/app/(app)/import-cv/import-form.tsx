@@ -136,9 +136,11 @@ export function ImportForm() {
                       </p>
                       <Link
                         href={`/diplomes/new?${params.toString()}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="mt-2 inline-block text-xs underline"
                       >
-                        Créer un diplôme →
+                        Créer un diplôme (nouvel onglet) →
                       </Link>
                     </li>
                   );
@@ -188,9 +190,11 @@ export function ImportForm() {
                       {exp.startDate && (
                         <Link
                           href={`/experiences/new?${params.toString()}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="mt-2 inline-block text-xs underline"
                         >
-                          Créer une expérience avec ces infos →
+                          Créer une expérience avec ces infos (nouvel onglet) →
                         </Link>
                       )}
                     </li>
@@ -220,9 +224,11 @@ export function ImportForm() {
                       </p>
                       <Link
                         href={`/experiences/new?${params.toString()}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="mt-2 inline-block text-xs underline"
                       >
-                        Créer une expérience avec ces dates →
+                        Créer une expérience avec ces dates (nouvel onglet) →
                       </Link>
                     </li>
                   );
