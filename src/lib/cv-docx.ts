@@ -48,6 +48,10 @@ export type CvData = {
   formations: CvFormationData[];
 };
 
+const ACCENT_COLOR = "1F4E79";
+const MUTED_COLOR = "595959";
+const SIDEBAR_FILL = "EAF1FB";
+
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", { month: "short", year: "numeric" });
 
 function formatDateRange(startDate: string, endDate: string | null): string {
@@ -73,20 +77,36 @@ function formationYearLabel(f: CvFormationData): string {
   return f.endYear && f.endYear !== f.startYear ? `${f.startYear}-${f.endYear}` : String(f.startYear);
 }
 
-function experienceParagraphs(exp: CvExperienceData, accentColor: string | null): Paragraph[] {
+// En-tête de section colorée avec un filet en dessous — répété sur les
+// deux templates pour une identité visuelle cohérente (sidebar plus
+// compacte : filet plus fin, moins d'espace avant/après).
+function sectionHeading(
+  text: string,
+  {
+    level = HeadingLevel.HEADING_2,
+    compact = false,
+  }: { level?: (typeof HeadingLevel)[keyof typeof HeadingLevel]; compact?: boolean } = {},
+): Paragraph {
+  return new Paragraph({
+    heading: level,
+    spacing: { before: compact ? 220 : 320, after: compact ? 80 : 140 },
+    border: {
+      bottom: { style: BorderStyle.SINGLE, size: compact ? 4 : 6, color: ACCENT_COLOR, space: 4 },
+    },
+    children: [new TextRun({ text, bold: true, color: ACCENT_COLOR })],
+  });
+}
+
+function experienceParagraphs(exp: CvExperienceData): Paragraph[] {
   const paragraphs: Paragraph[] = [
     new Paragraph({
-      spacing: { before: 200 },
+      spacing: { before: 220 },
       children: [new TextRun({ text: `${exp.title} — ${exp.company}`, bold: true })],
     }),
     new Paragraph({
+      spacing: { after: 80 },
       children: [
-        new TextRun({
-          text: experienceMetaLine(exp),
-          italics: true,
-          size: 20,
-          color: accentColor ?? "555555",
-        }),
+        new TextRun({ text: experienceMetaLine(exp), italics: true, size: 20, color: ACCENT_COLOR }),
       ],
     }),
   ];
@@ -99,9 +119,10 @@ function experienceParagraphs(exp: CvExperienceData, accentColor: string | null)
   if (exp.technologies.length > 0) {
     paragraphs.push(
       new Paragraph({
+        spacing: { before: 80 },
         children: [
-          new TextRun({ text: "Technologies : ", bold: true, size: 20 }),
-          new TextRun({ text: exp.technologies.join(", "), size: 20 }),
+          new TextRun({ text: "Technologies : ", bold: true, size: 20, color: MUTED_COLOR }),
+          new TextRun({ text: exp.technologies.join(", "), size: 20, color: MUTED_COLOR }),
         ],
       }),
     );
@@ -109,19 +130,7 @@ function experienceParagraphs(exp: CvExperienceData, accentColor: string | null)
   return paragraphs;
 }
 
-function buildClassicDocument(data: CvData): Document {
-  const children: Paragraph[] = [];
-
-  children.push(
-    new Paragraph({
-      heading: HeadingLevel.TITLE,
-      children: [new TextRun({ text: data.userName, bold: true })],
-    }),
-    new Paragraph({
-      children: [new TextRun({ text: data.title, italics: true, size: 26 })],
-    }),
-  );
-
+function headerParagraphs(data: CvData): Paragraph[] {
   const contactParts = [
     data.email,
     data.phone,
@@ -129,48 +138,69 @@ function buildClassicDocument(data: CvData): Document {
     data.linkedinUrl,
     data.websiteUrl,
   ].filter((v): v is string => Boolean(v));
+
+  const children = [
+    new Paragraph({
+      heading: HeadingLevel.TITLE,
+      spacing: { after: 40 },
+      children: [new TextRun({ text: data.userName, bold: true, color: ACCENT_COLOR, size: 36 })],
+    }),
+    new Paragraph({
+      spacing: { after: contactParts.length > 0 ? 160 : 280 },
+      children: [new TextRun({ text: data.title, italics: true, size: 26, color: MUTED_COLOR })],
+    }),
+  ];
+
   if (contactParts.length > 0) {
     children.push(
       new Paragraph({
-        spacing: { after: 200 },
-        children: [new TextRun({ text: contactParts.join(" · "), size: 20, color: "555555" })],
+        spacing: { after: 280 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: ACCENT_COLOR, space: 6 } },
+        children: [new TextRun({ text: contactParts.join("  ·  "), size: 20, color: MUTED_COLOR })],
       }),
     );
   }
+
+  return children;
+}
+
+function buildClassicDocument(data: CvData): Document {
+  const children: Paragraph[] = [...headerParagraphs(data)];
 
   if (data.summary) {
     children.push(
       new Paragraph({
         spacing: { after: 200 },
-        children: [new TextRun({ text: data.summary })],
+        children: [new TextRun({ text: data.summary, italics: true })],
       }),
     );
   }
 
   if (data.competences.length > 0) {
     children.push(
-      new Paragraph({ heading: HeadingLevel.HEADING_2, text: "Compétences" }),
+      sectionHeading("Compétences"),
       new Paragraph({
         spacing: { after: 200 },
-        children: [new TextRun({ text: data.competences.join(", ") })],
+        children: [new TextRun({ text: data.competences.join("  •  ") })],
       }),
     );
   }
 
   if (data.experiences.length > 0) {
-    children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, text: "Expériences professionnelles" }));
-    for (const exp of data.experiences) children.push(...experienceParagraphs(exp, null));
+    children.push(sectionHeading("Expériences professionnelles"));
+    for (const exp of data.experiences) children.push(...experienceParagraphs(exp));
   }
 
   if (data.formations.length > 0) {
-    children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, text: "Formation", spacing: { before: 200 } }));
+    children.push(sectionHeading("Formation"));
     for (const f of data.formations) {
       const label = f.institution ? `${f.title} — ${f.institution}` : f.title;
       children.push(
         new Paragraph({
+          spacing: { before: 80 },
           children: [
             new TextRun({ text: label, bold: true }),
-            new TextRun({ text: `  (${formationYearLabel(f)})`, size: 20, color: "555555" }),
+            new TextRun({ text: `  (${formationYearLabel(f)})`, size: 20, color: MUTED_COLOR }),
           ],
         }),
       );
@@ -178,10 +208,7 @@ function buildClassicDocument(data: CvData): Document {
   }
 
   if (data.languages) {
-    children.push(
-      new Paragraph({ heading: HeadingLevel.HEADING_2, text: "Langues", spacing: { before: 200 } }),
-      new Paragraph({ text: data.languages }),
-    );
+    children.push(sectionHeading("Langues"), new Paragraph({ text: data.languages }));
   }
 
   return new Document({
@@ -194,8 +221,6 @@ function buildClassicDocument(data: CvData): Document {
   });
 }
 
-const ACCENT_COLOR = "1F4E79";
-const SIDEBAR_FILL = "EAF1FB";
 const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
 const NO_BORDERS = {
   top: NO_BORDER,
@@ -207,15 +232,7 @@ const NO_BORDERS = {
 };
 
 function buildTwoColumnDocument(data: CvData): Document {
-  const headerChildren: Paragraph[] = [
-    new Paragraph({
-      heading: HeadingLevel.TITLE,
-      children: [new TextRun({ text: data.userName, bold: true, color: ACCENT_COLOR })],
-    }),
-    new Paragraph({
-      children: [new TextRun({ text: data.title, italics: true, size: 26, color: ACCENT_COLOR })],
-    }),
-  ];
+  const headerChildren = headerParagraphs(data);
 
   const sidebarChildren: Paragraph[] = [];
   const contactParts = [
@@ -230,9 +247,7 @@ function buildTwoColumnDocument(data: CvData): Document {
   }
 
   if (data.competences.length > 0) {
-    sidebarChildren.push(
-      new Paragraph({ heading: HeadingLevel.HEADING_3, text: "Compétences", spacing: { before: 200 } }),
-    );
+    sidebarChildren.push(sectionHeading("Compétences", { level: HeadingLevel.HEADING_3, compact: true }));
     for (const c of data.competences) {
       sidebarChildren.push(new Paragraph({ text: c, bullet: { level: 0 } }));
     }
@@ -240,15 +255,13 @@ function buildTwoColumnDocument(data: CvData): Document {
 
   if (data.languages) {
     sidebarChildren.push(
-      new Paragraph({ heading: HeadingLevel.HEADING_3, text: "Langues", spacing: { before: 200 } }),
+      sectionHeading("Langues", { level: HeadingLevel.HEADING_3, compact: true }),
       new Paragraph({ text: data.languages }),
     );
   }
 
   if (data.formations.length > 0) {
-    sidebarChildren.push(
-      new Paragraph({ heading: HeadingLevel.HEADING_3, text: "Formation", spacing: { before: 200 } }),
-    );
+    sidebarChildren.push(sectionHeading("Formation", { level: HeadingLevel.HEADING_3, compact: true }));
     for (const f of data.formations) {
       sidebarChildren.push(
         new Paragraph({
@@ -256,12 +269,12 @@ function buildTwoColumnDocument(data: CvData): Document {
         }),
       );
       if (f.institution) {
-        sidebarChildren.push(new Paragraph({ text: f.institution, run: { size: 18 } }));
+        sidebarChildren.push(new Paragraph({ text: f.institution, run: { size: 18, color: MUTED_COLOR } }));
       }
       sidebarChildren.push(
         new Paragraph({
-          spacing: { after: 120 },
-          children: [new TextRun({ text: formationYearLabel(f), size: 18, color: "555555" })],
+          spacing: { after: 160 },
+          children: [new TextRun({ text: formationYearLabel(f), size: 18, color: MUTED_COLOR })],
         }),
       );
     }
@@ -269,13 +282,13 @@ function buildTwoColumnDocument(data: CvData): Document {
 
   const mainChildren: Paragraph[] = [];
   if (data.summary) {
-    mainChildren.push(new Paragraph({ spacing: { after: 200 }, text: data.summary }));
+    mainChildren.push(
+      new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: data.summary, italics: true })] }),
+    );
   }
   if (data.experiences.length > 0) {
-    mainChildren.push(
-      new Paragraph({ heading: HeadingLevel.HEADING_2, text: "Expériences professionnelles" }),
-    );
-    for (const exp of data.experiences) mainChildren.push(...experienceParagraphs(exp, ACCENT_COLOR));
+    mainChildren.push(sectionHeading("Expériences professionnelles"));
+    for (const exp of data.experiences) mainChildren.push(...experienceParagraphs(exp));
   }
 
   // "autofit" (le défaut) laisse Word recalculer la largeur des colonnes à
