@@ -17,7 +17,7 @@ const applicationSchema = z.object({
   company: z.string().min(1, "L'entreprise est requise."),
   city: z.string().optional(),
   salary: z.coerce.number().int().min(0).optional(),
-  remoteType: z.enum(["presentiel", "hybride", "full_remote", ""]).optional(),
+  remoteDaysPerWeek: z.coerce.number().int().min(0).max(7).optional(),
   link: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -27,7 +27,7 @@ function parsedData(formData: FormData) {
     company: formData.get("company"),
     city: formData.get("city") || undefined,
     salary: formData.get("salary") || undefined,
-    remoteType: (formData.get("remoteType") as string) || undefined,
+    remoteDaysPerWeek: formData.get("remoteDaysPerWeek") || undefined,
     link: formData.get("link") || undefined,
     notes: formData.get("notes") || undefined,
   });
@@ -49,7 +49,7 @@ export async function createApplication(
       company: d.company,
       city: d.city || null,
       salary: d.salary ?? null,
-      remoteType: d.remoteType || null,
+      remoteDaysPerWeek: d.remoteDaysPerWeek ?? null,
       link: d.link || null,
       notes: d.notes || null,
     })
@@ -80,7 +80,7 @@ export async function updateApplication(
       company: d.company,
       city: d.city || null,
       salary: d.salary ?? null,
-      remoteType: d.remoteType || null,
+      remoteDaysPerWeek: d.remoteDaysPerWeek ?? null,
       link: d.link || null,
       notes: d.notes || null,
       updatedAt: new Date(),

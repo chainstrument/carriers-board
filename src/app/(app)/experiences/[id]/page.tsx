@@ -61,8 +61,8 @@ export default async function ExperienceDetailPage({
             {formatDateRange(experience.startDate, experience.endDate)} ·{" "}
             {durationLabel(experience.startDate, experience.endDate)}
             {experience.location ? ` · ${experience.location}` : ""}
-            {experience.remoteType
-              ? ` · ${experience.remoteType.replace("_", " ")}`
+            {experience.remoteDaysPerWeek !== null
+              ? ` · ${experience.remoteDaysPerWeek === 0 ? "présentiel" : `${experience.remoteDaysPerWeek} j télétravail/sem.`}`
               : ""}
           </p>
         </div>

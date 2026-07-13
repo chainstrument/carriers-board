@@ -5,13 +5,6 @@ import type { ActionState } from "./actions";
 import { TagInput } from "@/components/tag-input";
 import type { Experience } from "@/lib/db/schema";
 
-const REMOTE_OPTIONS = [
-  { value: "", label: "Non précisé" },
-  { value: "presentiel", label: "Présentiel" },
-  { value: "hybride", label: "Hybride" },
-  { value: "full_remote", label: "Full remote" },
-];
-
 function Field({
   id,
   label,
@@ -100,19 +93,16 @@ export function ExperienceForm({
             className={inputClass}
           />
         </Field>
-        <Field id="remoteType" label="Télétravail">
-          <select
-            id="remoteType"
-            name="remoteType"
-            defaultValue={defaultValues?.remoteType ?? ""}
+        <Field id="remoteDaysPerWeek" label="Jours de télétravail / semaine">
+          <input
+            id="remoteDaysPerWeek"
+            name="remoteDaysPerWeek"
+            type="number"
+            min={0}
+            max={7}
+            defaultValue={defaultValues?.remoteDaysPerWeek ?? ""}
             className={inputClass}
-          >
-            {REMOTE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+          />
         </Field>
         <Field id="startDate" label="Date de début">
           <input

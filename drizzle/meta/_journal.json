@@ -148,6 +148,20 @@
       "when": 1783939409471,
       "tag": "0020_lyrical_rockslide",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1783943259896,
+      "tag": "0021_silly_doctor_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1783943328993,
+      "tag": "0022_workable_wither",
+      "breakpoints": true
     }
   ]
 }

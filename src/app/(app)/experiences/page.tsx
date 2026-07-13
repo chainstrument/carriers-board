@@ -51,8 +51,8 @@ export default async function ExperiencesPage() {
               {exp.location && (
                 <p className="mt-1 text-sm text-neutral-500">
                   {exp.location}
-                  {exp.remoteType
-                    ? ` · ${exp.remoteType.replace("_", " ")}`
+                  {exp.remoteDaysPerWeek !== null
+                    ? ` · ${exp.remoteDaysPerWeek === 0 ? "présentiel" : `${exp.remoteDaysPerWeek} j télétravail/sem.`}`
                     : ""}
                 </p>
               )}

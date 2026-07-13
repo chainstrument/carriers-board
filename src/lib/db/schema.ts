@@ -23,8 +23,6 @@ export const users = pgTable("users", {
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
-export const remoteTypeEnum = pgEnum("remote_type", ["presentiel", "hybride", "full_remote"]);
-
 // Catalogue minimal des compétences, partagé par plusieurs epics
 // (Parcours, Projets...). Les attributs personnels (niveau, confiance,
 // envie de progresser) seront ajoutés directement sur cette table par
@@ -60,7 +58,8 @@ export const experiences = pgTable("experiences", {
   company: text("company").notNull(),
   title: text("title").notNull(),
   location: text("location"),
-  remoteType: remoteTypeEnum("remote_type"),
+  // Jours de télétravail par semaine : 0 = aucun, null = non précisé.
+  remoteDaysPerWeek: integer("remote_days_per_week"),
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
   manager: text("manager"),
@@ -412,7 +411,8 @@ export const jobApplications = pgTable("job_applications", {
   company: text("company").notNull(),
   city: text("city"),
   salary: integer("salary"),
-  remoteType: remoteTypeEnum("remote_type"),
+  // Jours de télétravail par semaine : 0 = aucun, null = non précisé.
+  remoteDaysPerWeek: integer("remote_days_per_week"),
   link: text("link"),
   notes: text("notes"),
   status: jobApplicationStatusEnum("status").notNull().default("to_review"),

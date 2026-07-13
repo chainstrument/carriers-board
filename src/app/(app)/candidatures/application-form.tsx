@@ -7,13 +7,6 @@ import type { JobApplication } from "@/lib/db/schema";
 const inputClass =
   "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800";
 
-const REMOTE_OPTIONS = [
-  { value: "", label: "Non précisé" },
-  { value: "presentiel", label: "Présentiel" },
-  { value: "hybride", label: "Hybride" },
-  { value: "full_remote", label: "Full remote" },
-];
-
 export function ApplicationForm({
   action,
   defaultValues,
@@ -75,23 +68,20 @@ export function ApplicationForm({
         </div>
         <div className="space-y-1">
           <label
-            htmlFor="remoteType"
+            htmlFor="remoteDaysPerWeek"
             className="text-sm text-neutral-600 dark:text-neutral-400"
           >
-            Télétravail
+            Jours de télétravail / semaine
           </label>
-          <select
-            id="remoteType"
-            name="remoteType"
-            defaultValue={defaultValues?.remoteType ?? ""}
+          <input
+            id="remoteDaysPerWeek"
+            name="remoteDaysPerWeek"
+            type="number"
+            min={0}
+            max={7}
+            defaultValue={defaultValues?.remoteDaysPerWeek ?? ""}
             className={inputClass}
-          >
-            {REMOTE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+          />
         </div>
       </div>
 
