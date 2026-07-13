@@ -6,6 +6,7 @@ import {
   Paragraph,
   Table,
   TableCell,
+  TableLayoutType,
   TableRow,
   TextRun,
   WidthType,
@@ -277,20 +278,28 @@ function buildTwoColumnDocument(data: CvData): Document {
     for (const exp of data.experiences) mainChildren.push(...experienceParagraphs(exp, ACCENT_COLOR));
   }
 
+  // "autofit" (le défaut) laisse Word recalculer la largeur des colonnes à
+  // partir du contenu, ce qui peut écraser la mise en page deux-colonnes —
+  // "fixed" + des largeurs explicites (en dxa) force le rendu voulu.
+  const SIDEBAR_WIDTH_DXA = 2992;
+  const MAIN_WIDTH_DXA = 6358;
+
   const table = new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
+    columnWidths: [SIDEBAR_WIDTH_DXA, MAIN_WIDTH_DXA],
+    layout: TableLayoutType.FIXED,
     borders: NO_BORDERS,
     rows: [
       new TableRow({
         children: [
           new TableCell({
-            width: { size: 32, type: WidthType.PERCENTAGE },
+            width: { size: SIDEBAR_WIDTH_DXA, type: WidthType.DXA },
             shading: { fill: SIDEBAR_FILL },
             margins: { top: 200, bottom: 200, left: 200, right: 200 },
             children: sidebarChildren.length > 0 ? sidebarChildren : [new Paragraph({ text: "" })],
           }),
           new TableCell({
-            width: { size: 68, type: WidthType.PERCENTAGE },
+            width: { size: MAIN_WIDTH_DXA, type: WidthType.DXA },
             margins: { top: 200, bottom: 200, left: 200, right: 200 },
             children: mainChildren.length > 0 ? mainChildren : [new Paragraph({ text: "" })],
           }),
