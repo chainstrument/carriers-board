@@ -375,6 +375,26 @@ export const trainingItems = pgTable("training_items", {
 export type TrainingItem = typeof trainingItems.$inferSelect;
 export type NewTrainingItem = typeof trainingItems.$inferInsert;
 
+// Scolarité/diplômes obtenus — distinct de `trainingItems` (auto-formation
+// continue avec un statut à faire/en cours/terminé) : un diplôme est un fait
+// déjà acquis, sans notion de progression.
+export const academicFormations = pgTable("academic_formations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  institution: text("institution"),
+  startYear: integer("start_year").notNull(),
+  endYear: integer("end_year"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type AcademicFormation = typeof academicFormations.$inferSelect;
+export type NewAcademicFormation = typeof academicFormations.$inferInsert;
+
 export const jobApplicationStatusEnum = pgEnum("job_application_status", [
   "to_review",
   "hr_contact",

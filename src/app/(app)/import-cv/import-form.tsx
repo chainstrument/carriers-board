@@ -115,17 +115,17 @@ export function ImportForm() {
           {state.formations && state.formations.length > 0 && (
             <div>
               <h3 className="mb-2 text-sm font-medium text-neutral-500">
-                Formations détectées ({state.formations.length})
+                Diplômes détectés ({state.formations.length})
               </h3>
               <ul className="space-y-2">
                 {state.formations.map((formation) => {
-                  const params = new URLSearchParams({ title: formation.title });
-                  params.set(
-                    "year",
-                    formation.endYear
-                      ? `${formation.startYear}-${formation.endYear}`
-                      : String(formation.startYear),
-                  );
+                  const params = new URLSearchParams({
+                    title: formation.title,
+                    startYear: String(formation.startYear),
+                  });
+                  if (formation.institution) params.set("institution", formation.institution);
+                  if (formation.endYear) params.set("endYear", String(formation.endYear));
+
                   return (
                     <li
                       key={formation.raw}
@@ -135,10 +135,10 @@ export function ImportForm() {
                         {formation.raw}
                       </p>
                       <Link
-                        href={`/formation/new?${params.toString()}`}
+                        href={`/diplomes/new?${params.toString()}`}
                         className="mt-2 inline-block text-xs underline"
                       >
-                        Créer une formation →
+                        Créer un diplôme →
                       </Link>
                     </li>
                   );

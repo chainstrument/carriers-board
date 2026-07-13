@@ -2,75 +2,30 @@
 
 import { useActionState } from "react";
 import type { ActionState } from "./actions";
-import type { TrainingItem } from "@/lib/db/schema";
-import { TYPE_OPTIONS, STATUS_OPTIONS } from "@/lib/formation";
+import type { AcademicFormation } from "@/lib/db/schema";
 
 const inputClass =
   "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800";
 
-export function ItemForm({
+export function FormationForm({
   action,
   defaultValues,
   submitLabel,
 }: {
   action: (prevState: ActionState, formData: FormData) => Promise<ActionState>;
-  defaultValues?: TrainingItem;
+  defaultValues?: Partial<AcademicFormation>;
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
 
   return (
     <form action={formAction} className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1">
-          <label
-            htmlFor="type"
-            className="text-sm text-neutral-600 dark:text-neutral-400"
-          >
-            Type
-          </label>
-          <select
-            id="type"
-            name="type"
-            defaultValue={defaultValues?.type ?? "book"}
-            className={inputClass}
-          >
-            {TYPE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="space-y-1">
-          <label
-            htmlFor="status"
-            className="text-sm text-neutral-600 dark:text-neutral-400"
-          >
-            État
-          </label>
-          <select
-            id="status"
-            name="status"
-            defaultValue={defaultValues?.status ?? "todo"}
-            className={inputClass}
-          >
-            {STATUS_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
       <div className="space-y-1">
         <label
           htmlFor="title"
           className="text-sm text-neutral-600 dark:text-neutral-400"
         >
-          Titre
+          Diplôme / intitulé
         </label>
         <input
           id="title"
@@ -81,35 +36,51 @@ export function ItemForm({
         />
       </div>
 
+      <div className="space-y-1">
+        <label
+          htmlFor="institution"
+          className="text-sm text-neutral-600 dark:text-neutral-400"
+        >
+          Établissement
+        </label>
+        <input
+          id="institution"
+          name="institution"
+          defaultValue={defaultValues?.institution ?? ""}
+          className={inputClass}
+        />
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1">
           <label
-            htmlFor="source"
+            htmlFor="startYear"
             className="text-sm text-neutral-600 dark:text-neutral-400"
           >
-            Source (lien, référence...)
+            Année de début
           </label>
           <input
-            id="source"
-            name="source"
-            defaultValue={defaultValues?.source ?? ""}
+            id="startYear"
+            name="startYear"
+            type="number"
+            required
+            defaultValue={defaultValues?.startYear}
             className={inputClass}
           />
         </div>
 
         <div className="space-y-1">
           <label
-            htmlFor="timeSpentMinutes"
+            htmlFor="endYear"
             className="text-sm text-neutral-600 dark:text-neutral-400"
           >
-            Temps passé (minutes)
+            Année d&apos;obtention (si différente)
           </label>
           <input
-            id="timeSpentMinutes"
-            name="timeSpentMinutes"
+            id="endYear"
+            name="endYear"
             type="number"
-            min={0}
-            defaultValue={defaultValues?.timeSpentMinutes ?? 0}
+            defaultValue={defaultValues?.endYear ?? ""}
             className={inputClass}
           />
         </div>
@@ -125,7 +96,7 @@ export function ItemForm({
         <textarea
           id="notes"
           name="notes"
-          rows={4}
+          rows={3}
           defaultValue={defaultValues?.notes ?? ""}
           className={inputClass}
         />

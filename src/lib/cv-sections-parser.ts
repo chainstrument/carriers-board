@@ -58,9 +58,14 @@ export type FormationEntry = {
   startYear: number;
   endYear: number | null;
   title: string;
+  institution: string | null;
 };
 
 const FORMATION_LINE_REGEX = /^(\d{4})(?:\s*[-–]\s*(\d{4}))?\s*:\s*(.+)$/;
+// Convention courante : le nom de l'établissement est mis entre
+// parenthèses à la fin de l'intitulé, ex. "Licence Informatique
+// (Université de Valenciennes)".
+const TRAILING_INSTITUTION_REGEX = /^(.*?)\s*\(([^)]+)\)\s*$/;
 
 export function parseFormations(sectionText: string): FormationEntry[] {
   const results: FormationEntry[] = [];
@@ -69,11 +74,16 @@ export function parseFormations(sectionText: string): FormationEntry[] {
     if (!trimmed) continue;
     const match = trimmed.match(FORMATION_LINE_REGEX);
     if (!match) continue;
+
+    const rawTitle = match[3].trim();
+    const institutionMatch = rawTitle.match(TRAILING_INSTITUTION_REGEX);
+
     results.push({
       raw: trimmed,
       startYear: Number(match[1]),
       endYear: match[2] ? Number(match[2]) : null,
-      title: match[3].trim(),
+      title: institutionMatch ? institutionMatch[1].trim() : rawTitle,
+      institution: institutionMatch ? institutionMatch[2].trim() : null,
     });
   }
   return results.sort((a, b) => b.startYear - a.startYear);

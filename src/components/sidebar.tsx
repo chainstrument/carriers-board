@@ -15,6 +15,7 @@ const NAV_SECTIONS = [
     title: "Carrière",
     items: [
       { href: "/experiences", label: "Parcours" },
+      { href: "/diplomes", label: "Diplômes" },
       { href: "/package", label: "Package" },
       { href: "/competences", label: "Compétences" },
       { href: "/journal", label: "Journal" },
