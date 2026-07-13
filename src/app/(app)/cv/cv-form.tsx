@@ -8,6 +8,11 @@ import type { CvOption } from "@/lib/cvs";
 const inputClass =
   "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800";
 
+const TEMPLATE_OPTIONS = [
+  { value: "classique", label: "Classique" },
+  { value: "deux_colonnes", label: "Deux colonnes avec sidebar" },
+];
+
 function CheckboxGroup({
   title,
   name,
@@ -100,6 +105,23 @@ export function CvForm({
           placeholder="Développeur Web Fullstack"
           className={inputClass}
         />
+      </div>
+
+      <div className="space-y-1">
+        <span className="text-sm text-neutral-600 dark:text-neutral-400">Template</span>
+        <div className="flex gap-4">
+          {TEMPLATE_OPTIONS.map((o) => (
+            <label key={o.value} className="flex items-center gap-1.5 text-sm">
+              <input
+                type="radio"
+                name="template"
+                value={o.value}
+                defaultChecked={(defaultValues?.template ?? "classique") === o.value}
+              />
+              {o.label}
+            </label>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-1">

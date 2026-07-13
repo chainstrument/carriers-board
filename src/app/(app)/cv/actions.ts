@@ -24,6 +24,7 @@ const cvSchema = z.object({
   summary: z.string().optional(),
   languages: z.string().optional(),
   showMissions: z.string().optional(),
+  template: z.enum(["classique", "deux_colonnes"]),
 });
 
 function parsedData(formData: FormData) {
@@ -33,6 +34,7 @@ function parsedData(formData: FormData) {
     summary: formData.get("summary") || undefined,
     languages: formData.get("languages") || undefined,
     showMissions: formData.get("showMissions") || undefined,
+    template: formData.get("template") || "classique",
   });
 }
 
@@ -96,6 +98,7 @@ export async function createCv(_prevState: ActionState, formData: FormData): Pro
       summary: d.summary || null,
       languages: d.languages || null,
       showMissions: d.showMissions === "on",
+      template: d.template,
     })
     .returning();
 
@@ -123,6 +126,7 @@ export async function updateCv(
       summary: d.summary || null,
       languages: d.languages || null,
       showMissions: d.showMissions === "on",
+      template: d.template,
       updatedAt: new Date(),
     })
     .where(and(eq(cvs.id, cvId), eq(cvs.userId, userId)))

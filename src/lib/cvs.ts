@@ -101,6 +101,7 @@ export async function buildCvData(userId: string, cvId: string): Promise<CvData 
     }));
 
   return {
+    template: cv.template,
     title: cv.title,
     userName: user.name,
     email: user.email,
