@@ -228,46 +228,27 @@ function matchLabel(line: string): { field: string; value: string } | null {
   return { field, value: match[2].trim() };
 }
 
+// Les entrées sont normalement séparées par une ligne de soulignés, mais
+// Word convertit souvent "___" + Entrée en bordure de paragraphe (un
+// graphique, pas du texte) : l'extraction brute ne la voit alors plus du
+// tout. On ne peut donc pas compter sur ce séparateur — la réapparition du
+// label "Période" (toujours présent, en premier, sur chaque entrée) sert de
+// frontière fiable à la place ; la ligne de soulignés, quand elle survit
+// dans le texte, est traitée comme une frontière supplémentaire.
 export function parseExperiencesProfessionnelles(sectionText: string): StructuredExperience[] {
-  const blocks = sectionText
-    .split(/^_{3,}\s*$/m)
-    .map((b) => b.trim())
-    .filter(Boolean);
-
   const results: StructuredExperience[] = [];
 
-  for (const block of blocks) {
-    let periode = "";
-    let fonction = "";
-    let societe = "";
-    let technologies: string[] = [];
-    const missionLines: string[] = [];
-    let collectingMissions = false;
+  let periode = "";
+  let fonction = "";
+  let societe = "";
+  let technologies: string[] = [];
+  let missionLines: string[] = [];
+  let collectingMissions = false;
+  let hasData = false;
 
-    for (const rawLine of block.split(/\r?\n/)) {
-      const line = rawLine.trim();
-      const labelMatch = matchLabel(line);
-      if (labelMatch) {
-        collectingMissions = labelMatch.field === "missions";
-        if (labelMatch.field === "periode") periode = labelMatch.value;
-        else if (labelMatch.field === "fonction") fonction = labelMatch.value;
-        else if (labelMatch.field === "societe") societe = labelMatch.value;
-        else if (labelMatch.field === "technologies")
-          technologies = labelMatch.value
-            .split(",")
-            .map(normalizeSkillToken)
-            .filter(Boolean);
-        else if (labelMatch.field === "missions" && labelMatch.value)
-          missionLines.push(labelMatch.value);
-        continue;
-      }
-      if (collectingMissions && line) missionLines.push(line);
-    }
-
-    if (!periode && !fonction && !societe && missionLines.length === 0) continue;
-
+  function flush() {
+    if (!hasData) return;
     const parsed = parsePeriode(periode);
-
     results.push({
       rawPeriod: periode || null,
       startDate: parsed?.startDate ?? null,
@@ -278,7 +259,45 @@ export function parseExperiencesProfessionnelles(sectionText: string): Structure
       missions: missionLines.length > 0 ? missionLines.join("\n") : null,
       technologies,
     });
+    periode = "";
+    fonction = "";
+    societe = "";
+    technologies = [];
+    missionLines = [];
+    hasData = false;
   }
+
+  for (const rawLine of sectionText.split(/\r?\n/)) {
+    const line = rawLine.trim();
+
+    if (/^_{3,}$/.test(line)) {
+      flush();
+      collectingMissions = false;
+      continue;
+    }
+
+    const labelMatch = matchLabel(line);
+    if (labelMatch) {
+      if (labelMatch.field === "periode" && hasData) flush();
+      collectingMissions = labelMatch.field === "missions";
+      hasData = true;
+      if (labelMatch.field === "periode") periode = labelMatch.value;
+      else if (labelMatch.field === "fonction") fonction = labelMatch.value;
+      else if (labelMatch.field === "societe") societe = labelMatch.value;
+      else if (labelMatch.field === "technologies")
+        technologies = labelMatch.value
+          .split(",")
+          .map(normalizeSkillToken)
+          .filter(Boolean);
+      else if (labelMatch.field === "missions" && labelMatch.value)
+        missionLines.push(labelMatch.value);
+      continue;
+    }
+
+    if (collectingMissions && line) missionLines.push(line);
+  }
+
+  flush();
 
   return results;
 }
