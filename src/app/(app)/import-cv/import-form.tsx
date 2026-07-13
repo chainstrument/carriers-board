@@ -23,13 +23,13 @@ export function ImportForm() {
             htmlFor="cv"
             className="text-sm text-neutral-600 dark:text-neutral-400"
           >
-            Fichier PDF
+            Fichier PDF ou Word (.docx)
           </label>
           <input
             id="cv"
             name="cv"
             type="file"
-            accept="application/pdf"
+            accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             required
             className="block w-full text-sm text-neutral-600 file:mr-3 file:rounded-md file:border-0 file:bg-neutral-900 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white dark:text-neutral-400 dark:file:bg-neutral-100 dark:file:text-neutral-900"
           />
@@ -46,9 +46,10 @@ export function ImportForm() {
         </button>
         <p className="text-xs text-neutral-400">
           Extraction par règles (dates, mots-clés de compétences, email,
-          téléphone) — pas d&apos;IA. Le PDF n&apos;est pas conservé, seules les
-          informations détectées ci-dessous le sont, et uniquement après ta
-          validation.
+          téléphone, et sections FORMATIONS / COMPÉTENCES / EXPÉRIENCES si le
+          CV est structuré) — pas d&apos;IA. Le fichier n&apos;est pas
+          conservé, seules les informations détectées ci-dessous le sont, et
+          uniquement après ta validation.
         </p>
       </form>
 
@@ -111,11 +112,92 @@ export function ImportForm() {
             )}
           </div>
 
+          {state.formations && state.formations.length > 0 && (
+            <div>
+              <h3 className="mb-2 text-sm font-medium text-neutral-500">
+                Formations détectées ({state.formations.length})
+              </h3>
+              <ul className="space-y-2">
+                {state.formations.map((formation) => {
+                  const params = new URLSearchParams({ title: formation.title });
+                  params.set(
+                    "year",
+                    formation.endYear
+                      ? `${formation.startYear}-${formation.endYear}`
+                      : String(formation.startYear),
+                  );
+                  return (
+                    <li
+                      key={formation.raw}
+                      className="rounded-lg border border-neutral-200 p-3 text-sm dark:border-neutral-800"
+                    >
+                      <p className="font-medium text-neutral-900 dark:text-neutral-100">
+                        {formation.raw}
+                      </p>
+                      <Link
+                        href={`/formation/new?${params.toString()}`}
+                        className="mt-2 inline-block text-xs underline"
+                      >
+                        Créer une formation →
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+
           <div>
             <h3 className="mb-2 text-sm font-medium text-neutral-500">
-              Périodes détectées ({state.dateRanges?.length ?? 0})
+              Expériences détectées (
+              {state.structuredExperiences && state.structuredExperiences.length > 0
+                ? state.structuredExperiences.length
+                : (state.dateRanges?.length ?? 0)}
+              )
             </h3>
-            {state.dateRanges && state.dateRanges.length > 0 ? (
+            {state.structuredExperiences && state.structuredExperiences.length > 0 ? (
+              <ul className="space-y-2">
+                {state.structuredExperiences.map((exp, i) => {
+                  const params = new URLSearchParams();
+                  if (exp.startDate) params.set("startDate", exp.startDate);
+                  if (exp.isCurrent) params.set("isCurrent", "1");
+                  else if (exp.endDate) params.set("endDate", exp.endDate);
+                  if (exp.company) params.set("company", exp.company);
+                  if (exp.title) params.set("title", exp.title);
+                  if (exp.missions) params.set("missions", exp.missions);
+                  if (exp.technologies.length > 0)
+                    params.set("technologies", exp.technologies.join(","));
+
+                  return (
+                    <li
+                      key={`${exp.rawPeriod}-${i}`}
+                      className="rounded-lg border border-neutral-200 p-3 text-sm dark:border-neutral-800"
+                    >
+                      <p className="font-medium text-neutral-900 dark:text-neutral-100">
+                        {exp.title ?? "Poste non détecté"}
+                        {exp.company && ` — ${exp.company}`}
+                      </p>
+                      <p className="mt-1 text-xs text-neutral-500">
+                        {exp.rawPeriod}
+                      </p>
+                      {exp.technologies.length > 0 && (
+                        <p className="mt-1 text-xs text-neutral-400">
+                          {exp.technologies.join(", ")}
+                        </p>
+                      )}
+                      {exp.startDate && (
+                        <Link
+                          href={`/experiences/new?${params.toString()}`}
+                          className="mt-2 inline-block text-xs underline"
+                        >
+                          Créer une expérience avec ces infos →
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : state.dateRanges && state.dateRanges.length > 0 ? (
               <ul className="space-y-2">
                 {state.dateRanges.map((range) => {
                   const params = new URLSearchParams({
@@ -152,8 +234,9 @@ export function ImportForm() {
               </p>
             )}
             <p className="mt-3 text-xs text-neutral-400">
-              L&apos;entreprise et le poste ne sont pas devinés automatiquement
-              — relis le contexte affiché et complète-les toi-même sur la fiche.
+              {state.structuredExperiences && state.structuredExperiences.length > 0
+                ? "Entreprise, poste, dates et technologies sont pré-remplis depuis les libellés détectés sur le CV — relis-les avant de valider."
+                : "L'entreprise et le poste ne sont pas devinés automatiquement — relis le contexte affiché et complète-les toi-même sur la fiche."}
             </p>
           </div>
         </div>

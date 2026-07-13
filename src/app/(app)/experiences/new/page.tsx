@@ -10,6 +10,10 @@ export default async function NewExperiencePage({
     startDate?: string;
     endDate?: string;
     isCurrent?: string;
+    company?: string;
+    title?: string;
+    missions?: string;
+    technologies?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -18,8 +22,14 @@ export default async function NewExperiencePage({
     ? {
         startDate: params.startDate,
         endDate: params.isCurrent ? null : (params.endDate ?? null),
+        company: params.company,
+        title: params.title,
+        missions: params.missions,
       }
     : undefined;
+  const defaultTechnologies = params.technologies
+    ? params.technologies.split(",").map((t) => t.trim()).filter(Boolean)
+    : [];
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-16">
@@ -34,7 +44,7 @@ export default async function NewExperiencePage({
       </h2>
       {hasPrefill && (
         <p className="mb-6 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
-          Dates pré-remplies depuis l&apos;import CV — vérifie-les et complète
+          Champs pré-remplis depuis l&apos;import CV — vérifie-les et complète
           le reste.
         </p>
       )}
@@ -42,6 +52,7 @@ export default async function NewExperiencePage({
         action={createExperience}
         submitLabel="Créer"
         defaultValues={defaultValues}
+        defaultTechnologies={defaultTechnologies}
       />
     </div>
   );

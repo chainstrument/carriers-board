@@ -14,7 +14,7 @@ export function ItemForm({
   submitLabel,
 }: {
   action: (prevState: ActionState, formData: FormData) => Promise<ActionState>;
-  defaultValues?: TrainingItem;
+  defaultValues?: Partial<TrainingItem>;
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);

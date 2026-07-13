@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getDocumentProxy, extractText } from "unpdf";
+import mammoth from "mammoth";
 import { requireUserId } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { competences } from "@/lib/db/schema";
@@ -13,6 +14,18 @@ import {
   COMMON_SKILLS,
   type DetectedDateRange,
 } from "@/lib/cv-parser";
+import {
+  splitSections,
+  parseFormations,
+  parseCompetencesInformatiques,
+  flattenSkillCategories,
+  parseExperiencesProfessionnelles,
+  type FormationEntry,
+  type StructuredExperience,
+} from "@/lib/cv-sections-parser";
+
+const DOCX_MIME =
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 export type ParseCvState =
   | {
@@ -21,6 +34,8 @@ export type ParseCvState =
       phone?: string | null;
       dateRanges?: DetectedDateRange[];
       skills?: string[];
+      formations?: FormationEntry[];
+      structuredExperiences?: StructuredExperience[];
     }
   | undefined;
 
@@ -32,28 +47,38 @@ export async function parseCv(
 
   const file = formData.get("cv");
   if (!(file instanceof File) || file.size === 0) {
-    return { error: "Sélectionne un fichier PDF." };
+    return { error: "Sélectionne un fichier PDF ou Word (.docx)." };
   }
-  if (file.type !== "application/pdf") {
-    return { error: "Le fichier doit être un PDF." };
+
+  const fileName = file.name.toLowerCase();
+  const isPdf = file.type === "application/pdf" || fileName.endsWith(".pdf");
+  const isDocx = file.type === DOCX_MIME || fileName.endsWith(".docx");
+  if (!isPdf && !isDocx) {
+    return { error: "Le fichier doit être un PDF ou un Word (.docx)." };
   }
 
   let text: string;
   try {
-    const buffer = new Uint8Array(await file.arrayBuffer());
-    const pdf = await getDocumentProxy(buffer);
-    const result = await extractText(pdf, { mergePages: true });
-    text = result.text;
+    const arrayBuffer = await file.arrayBuffer();
+    if (isDocx) {
+      const result = await mammoth.extractRawText({ buffer: Buffer.from(arrayBuffer) });
+      text = result.value;
+    } else {
+      const result = await extractText(await getDocumentProxy(new Uint8Array(arrayBuffer)), {
+        mergePages: true,
+      });
+      text = result.text;
+    }
   } catch {
     return {
-      error: "Impossible de lire ce PDF (fichier corrompu ou protégé).",
+      error: "Impossible de lire ce fichier (corrompu, protégé, ou format non pris en charge).",
     };
   }
 
   if (!text.trim()) {
     return {
       error:
-        "Aucun texte trouvé dans ce PDF (peut-être un scan sans texte réel).",
+        "Aucun texte trouvé dans ce fichier (peut-être un scan sans texte réel).",
     };
   }
 
@@ -64,11 +89,32 @@ export async function parseCv(
     ...new Set([...COMMON_SKILLS, ...existingCompetences.map((c) => c.name)]),
   ];
 
+  const sections = splitSections(text);
+  const formations = sections.formations ? parseFormations(sections.formations) : [];
+  const structuredExperiences = sections.experiencesProfessionnelles
+    ? parseExperiencesProfessionnelles(sections.experiencesProfessionnelles)
+    : [];
+  const structuredSkills = sections.competencesInformatiques
+    ? flattenSkillCategories(parseCompetencesInformatiques(sections.competencesInformatiques))
+    : [];
+
+  const skillsByKey = new Map<string, string>();
+  for (const skill of [
+    ...structuredSkills,
+    ...structuredExperiences.flatMap((e) => e.technologies),
+    ...extractSkills(text, dictionary),
+  ]) {
+    const key = skill.toLowerCase();
+    if (!skillsByKey.has(key)) skillsByKey.set(key, skill);
+  }
+
   return {
     email: extractEmail(text),
     phone: extractPhone(text),
-    dateRanges: extractDateRanges(text),
-    skills: extractSkills(text, dictionary),
+    dateRanges: structuredExperiences.length > 0 ? [] : extractDateRanges(text),
+    skills: [...skillsByKey.values()],
+    formations,
+    structuredExperiences,
   };
 }
 
