@@ -23,6 +23,7 @@ const cvSchema = z.object({
   title: z.string().min(1, "Le titre est requis."),
   summary: z.string().optional(),
   languages: z.string().optional(),
+  showMissions: z.string().optional(),
 });
 
 function parsedData(formData: FormData) {
@@ -31,6 +32,7 @@ function parsedData(formData: FormData) {
     title: formData.get("title"),
     summary: formData.get("summary") || undefined,
     languages: formData.get("languages") || undefined,
+    showMissions: formData.get("showMissions") || undefined,
   });
 }
 
@@ -93,6 +95,7 @@ export async function createCv(_prevState: ActionState, formData: FormData): Pro
       title: d.title,
       summary: d.summary || null,
       languages: d.languages || null,
+      showMissions: d.showMissions === "on",
     })
     .returning();
 
@@ -119,6 +122,7 @@ export async function updateCv(
       title: d.title,
       summary: d.summary || null,
       languages: d.languages || null,
+      showMissions: d.showMissions === "on",
       updatedAt: new Date(),
     })
     .where(and(eq(cvs.id, cvId), eq(cvs.userId, userId)))

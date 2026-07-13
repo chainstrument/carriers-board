@@ -86,7 +86,7 @@ export async function buildCvData(userId: string, cvId: string): Promise<CvData 
       endDate: exp.endDate,
       location: exp.location,
       remoteDaysPerWeek: exp.remoteDaysPerWeek,
-      missions: exp.missions,
+      missions: cv.showMissions ? exp.missions : null,
       technologies: exp.experienceCompetences.map((ec) => ec.competence.name),
     }));
 

@@ -1,0 +1,1 @@
+ALTER TABLE "cvs" ADD COLUMN "show_missions" boolean DEFAULT true NOT NULL;

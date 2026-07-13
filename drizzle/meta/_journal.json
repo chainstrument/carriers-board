@@ -169,6 +169,13 @@
       "when": 1783944860599,
       "tag": "0023_wide_sprite",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1783946863261,
+      "tag": "0024_careful_hellion",
+      "breakpoints": true
     }
   ]
 }

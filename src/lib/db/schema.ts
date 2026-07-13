@@ -467,6 +467,9 @@ export const cvs = pgTable("cvs", {
   title: text("title").notNull(),
   summary: text("summary"),
   languages: text("languages"),
+  // Réglage global du CV : affiche ou masque les missions de toutes les
+  // expériences sélectionnées (pas de personnalisation par expérience).
+  showMissions: boolean("show_missions").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

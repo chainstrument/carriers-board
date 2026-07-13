@@ -128,6 +128,15 @@ export function CvForm({
         />
       </div>
 
+      <label className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+        <input
+          type="checkbox"
+          name="showMissions"
+          defaultChecked={defaultValues?.showMissions ?? true}
+        />
+        Afficher les missions des expériences sélectionnées
+      </label>
+
       <CheckboxGroup
         title="Expériences"
         name="experienceIds"
