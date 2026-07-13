@@ -456,6 +456,8 @@ export const jobApplicationStatusHistoryRelations = relations(jobApplicationStat
 // partir des sections cochées ci-dessous et des données déjà en base
 // (Expériences, Compétences, Diplômes) — pas de double saisie, toujours à
 // jour si la fiche source change.
+export const cvTemplateEnum = pgEnum("cv_template", ["classique", "deux_colonnes"]);
+
 export const cvs = pgTable("cvs", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id")
@@ -470,6 +472,7 @@ export const cvs = pgTable("cvs", {
   // Réglage global du CV : affiche ou masque les missions de toutes les
   // expériences sélectionnées (pas de personnalisation par expérience).
   showMissions: boolean("show_missions").notNull().default(true),
+  template: cvTemplateEnum("template").notNull().default("classique"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
